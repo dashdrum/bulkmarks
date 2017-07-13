@@ -1,0 +1,40 @@
+{% extends "links_base.html" %}
+{% load staticfiles %}
+
+
+{% block title %}{{ block.super }} - Link Test{% endblock title %}
+
+{% block css_custom %}
+	{{ block.super }}
+
+{% endblock css_custom %}{% block js.custom %}
+	{{ block.super }}
+
+{% endblock js.custom %}
+
+
+{% block page_title %}Link Test{% endblock page_title %}
+
+{% block content %}
+
+  <p>Hello</p><p>Hello</p>
+
+<div class="row">
+	<div id="linkInformation" class="col-md-10 col-md-offset-1">
+		<p><label for="title">Title:</label> {{ object.title }}</p>
+		<p><label for="url">URL:</label> {{ object.url }}</p>
+		{% if object.status %}
+			<p><label for="status">Previous Status:</label> {{object.status}} as of {{ object.tested_on}}</p>
+		{% endif %}
+		<p><label for="status_code">Status Code Returned:</label> {{ link_status_code}}</p>
+
+	</div>
+</div>
+
+
+
+{% endblock content %}
+
+{% block nav_items %}
+{{ block.super }}
+{% endblock nav_items %}

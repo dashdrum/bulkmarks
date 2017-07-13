@@ -1,0 +1,1 @@
+IMPORT_TYPE_CHOICES = [('D','Delicious'),]

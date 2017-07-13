@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block css_shared %}
+{{ block.super }}
+
+		<!-- Application CSS -->
+
+
+	{% endblock css_shared %}
+
+{% block js.shared %}
+{{ block.super }}
+{% endblock js.shared %}
+
+{% block title %}Dupe{% endblock title %}
+
+{% block extra_head %}
+
+{% endblock extra_head %}
+
+{% block nav_items %}
+	{{ block.super }}
+
+
+{% endblock nav_items %}
+
+{% block contentheader %}
+{{block.super}}
+
+<span id="page_title">{% block page_title %}{% endblock page_title %}</span>
+{% endblock contentheader %}

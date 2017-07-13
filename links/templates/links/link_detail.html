@@ -1,0 +1,50 @@
+{% extends "links_base.html" %}
+{% load staticfiles %}
+
+
+{% block title %}{{ block.super }} - Detail{% endblock title %}
+
+{% block css_custom %}
+	{{ block.super }}
+
+{% endblock css_custom %}{% block js.custom %}
+	{{ block.super }}
+
+{% endblock js.custom %}
+
+
+{% block page_title %}Link Detail{% endblock page_title %}
+
+{% block content %}
+
+  <p>Hello</p><p>Hello</p>
+
+<div class="row">
+	<div id="linkInformation" class="col-md-10 col-md-offset-1">
+		<p><label for="title">Title:</label> {{ object.title }}</p>
+		<p><label for="url">URL:</label> {{ object.url }}</p>
+		<p><label for="comment">Comments:</label> {{ object.comments }}</p>
+		<p><label for="public">Public Link:</label> {{ object.public }}</p>
+		{% if object.status %}
+			<p><label for="status">Status:</label> {{object.status}} as of {{ object.tested_on}}</p>
+		{% endif %}
+
+		<p></p>
+		<p><label for="created_on">created_on:</label> {{ object.created_on }}</p>
+		<p><label for="updated_on">updated_on:</label> {{ object.updated_on }}</p>
+		<p><label for="id">ID:</label> {{ object.id }}</p>
+		<p><label for="user">User:</label> {{ object.user }}</p>
+		<a href="{% url 'linkvisit' object.id %}" target="_blank">Visit</a>
+		<a href="{% url 'linkupdate' object.id %}">Edit</a>
+		<a href="{% url 'linktest' object.id %}">Test</a>
+
+	</div>
+</div>
+
+
+
+{% endblock content %}
+
+{% block nav_items %}
+{{ block.super }}
+{% endblock nav_items %}
