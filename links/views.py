@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 
 from django.shortcuts import render
 from django.views.generic import (FormView, TemplateView, ListView, CreateView,
@@ -14,8 +15,8 @@ from braces.views import SuccessURLRedirectListMixin
 from annoying.functions import get_object_or_None
 from django.utils.timezone import make_aware, utc
 
-from .models import Link, Profile, ImportFile
-from .forms import LinkForm, ImportFileForm
+from .models import Link, Profile, InterfaceFile
+from .forms import LinkForm, ImportFileForm, ExportFileForm
 
 def get_profile(user):
 	try:
@@ -99,14 +100,17 @@ class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 
 		user = self.request.user
 
-		instance = ImportFile()
+		instance = InterfaceFile()
 		instance.profile = get_profile(user)
-		instance.import_type = form.cleaned_data['import_type']
+		instance.file_format = form.cleaned_data['import_type']
+		instance.file_type = 'I'  ## This is an import file
 
 		f = self.request.FILES['import_file']
 		instance.file_name = f.name
 		if not f.multiple_chunks():  # enforce size limit
-			instance.import_text = f.read()
+			instance.text = f.read()
+		else:
+			instance.status = 'E'
 
 		instance.save()
 		instance.refresh_from_db()
@@ -114,6 +118,29 @@ class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 		import_links_from_file(instance.id)
 
 		return super(UploadImportFileTemplateView,self).form_valid(form)
+
+from django.core.files import File
+
+class ExportLinksView(LoginRequiredMixin,FormView):
+
+	form_class = ExportFileForm
+	template_name = 'links/export.html'
+
+	def form_valid(self,form):
+
+		profile = get_profile(self.request.user)
+
+		export_id = export_links_to_delicious(get_profile(self.request.user).id)
+
+		file_instance = get_object_or_None(InterfaceFile,id=export_id,profile=profile)
+
+		# Create the HttpResponse object with the appropriate header.
+		response = HttpResponse(file_instance.text,content_type='text/html')
+		response['Content-Disposition'] = 'attachment; filename="' + file_instance.file_name + '"'
+
+		return response
+
+		# No super call needed
 
 class TestLinkView(LoginRequiredMixin,DetailView):
 	model = Link
@@ -214,7 +241,7 @@ def import_links_from_file(import_file_id):
 	import_status = None
 
 	try:
-		import_obj = get_object_or_None(ImportFile, id = import_file_id)
+		import_obj = get_object_or_None(InterfaceFile, id = import_file_id)
 		profile = import_obj.profile
 	except:
 		# raise some sort of error
@@ -229,7 +256,7 @@ def import_links_from_file(import_file_id):
 		except:
 			import_status = 'E'
 
-	import_obj.import_status = import_status
+	import_obj.status = import_status
 	import_obj.save()
 
 	return import_status
@@ -308,4 +335,64 @@ def get_link_status(url):
 	## something failed
 	return '500'
 
+
+
+
+#-----------------------------------------------------------------------------#
+
+
+def export_links_to_delicious(profile_id):
+
+	''' Writes link information to an HTML file using the horrible del.icio.us format '''
+
+	profile = get_object_or_None(Profile,id=profile_id)
+
+	queryset = Link.objects.filter(profile=profile)
+
+	filename = profile.user.username + '.html'
+
+	instance = InterfaceFile()
+	instance.profile = profile
+	instance.file_format = 'D'
+	instance.file_type = 'E'  ## This is an export file
+	instance.file_name = filename
+
+	outtext = ''   ## Holds the text of the file
+
+	# Write header info
+
+	outtext += '<!DOCTYPE NETSCAPE-Bookmark-file-1>\n'
+	outtext += '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n'
+	outtext += '<TITLE>Bookmarks</TITLE>\n'
+	outtext += '<H1>Bookmarks</H1>\n'
+	outtext += '<DL><p>\n'
+
+	# Process links
+
+	for link in queryset:
+		outtext += '<DT><A HREF="'
+		outtext += link.url
+		outtext += '" ADD_DATE="'
+		outtext += str(time.mktime(link.created_on.timetuple()))
+		outtext += '" PRIVATE="'
+		outtext += str(int(not link.public)) #AWKWARD!
+		outtext += '" TAGS="'
+		outtext += ''
+		outtext += '">'
+		outtext += link.title
+		outtext += '</A>\n'
+
+		if link.comment:
+			outtext += '<DD>'
+			outtext += link.comment + '\n'
+
+	# Write footer info
+
+	outtext += '</DL><p>'
+
+	instance.text = outtext
+
+	instance.save()
+
+	return instance.id
 

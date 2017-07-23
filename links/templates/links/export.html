@@ -1,0 +1,42 @@
+{% extends "links_base.html" %}
+
+{% block title %}{{ block.super }} - Export{% endblock title %}
+
+
+{% block page_title %}Link Export{% endblock page_title %}
+
+{% block content %}
+  <p>Hello</p><p>Hello</p>
+<form action="." method="post" enctype="multipart/form-data"> {% csrf_token %}
+<div class="row">
+	<div id="importInfo" class="col-md-10 col-md-offset-1">
+
+		<span class='show_error'>{{ form.non_field_errors }}</span>
+
+		{% for field in form %}
+				<div class="fieldWrapper">
+					<p>
+						{% if field.errors %}<span class='show_error'>{% endif %}
+						{{ field.label_tag }}
+						{% if field.errors %}</span>{% endif %}
+						{{ field }}
+						{{ field.errors }}
+					</p>
+				</div>
+		{% endfor %}
+
+		{% if not form %}No form!!{% endif %}
+
+	</div>
+</div>
+
+<div class="row">
+	<div class="btn-group" role="group" aria-label="...">
+		<input   class="btn btn-secondary"  type="submit" value="Export" class="button"/>
+		<input   class="btn btn-secondary"  type=button value="Cancel" onClick="history.go(-1)" class="button" >
+	</div>
+</div>
+
+	</form>
+
+{% endblock content %}

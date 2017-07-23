@@ -57,19 +57,20 @@ class Profile(ModelBase):
 	class Admin:
 		pass
 
-class ImportFile(ModelBase):
+class InterfaceFile(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	profile = models.ForeignKey('Profile',null=False,blank=False)
 	file_name = models.CharField(max_length=500,null=True,blank=True)
-	import_text = models.TextField(null=False,blank=True)
-	import_type = models.CharField(max_length=1,null=False,blank=False) # Delicious, others TBA
-	import_status = models.CharField(max_length=1,null=False,blank=False,default='N') # No, Yes, Error
+	file_type = models.CharField(max_length=1, null=False,blank=False)
+	text = models.TextField(null=False,blank=True)
+	file_format = models.CharField(max_length=1,null=False,blank=False) # Delicious, others TBA - maybe OPML and HTML
+	status = models.CharField(max_length=1,null=False,blank=False,default='N') # No, Yes, Error
 
 	def __str__(self):
 		return self.profile.display_name + ' ' + self.created_on.strftime('%Y-%m-%d %H:%M:%S')
 
 	class Meta:
-		permissions = (('view_imports',"Can view imports"),)
+		permissions = (('view_interface_files',"Can view interface files"),)
 
 	class Admin:
 		pass

@@ -17,3 +17,5 @@ class ImportFileForm(Form):
 	import_file = FileField(allow_empty_file=False,required=True)
 	import_type = EmptyChoiceField(required=True,choices=IMPORT_TYPE_CHOICES)
 
+class ExportFileForm(Form):
+	pass

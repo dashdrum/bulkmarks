@@ -15,7 +15,8 @@ Including another URLconf
 """
 from django.conf.urls import url
 from .views import (UserLinkListView, LinkDetailView, LinkCreateView, LinkUpdateView,
-                    UploadImportFileTemplateView, TestLinkView, VisitLinkView)
+                    UploadImportFileTemplateView, TestLinkView, VisitLinkView,
+                    ExportLinksView)
 
 urlpatterns = [
     url(r'^userlinks/$', UserLinkListView.as_view(), name='userlinks'),
@@ -25,4 +26,5 @@ urlpatterns = [
     url(r'^linkupdate/(?P<pk>[0-9A-Fa-f-]+)/$',LinkUpdateView.as_view(),name='linkupdate'),
     url(r'^linktest/(?P<pk>[0-9A-Fa-f-]+)/$',TestLinkView.as_view(),name='linktest'),
     url(r'^import/$', UploadImportFileTemplateView.as_view(), name='import'),
+    url(r'^export/$', ExportLinksView.as_view(), name='export'),
 ]
