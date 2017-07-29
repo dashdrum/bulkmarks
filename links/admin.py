@@ -8,7 +8,7 @@ class LinkAdmin(admin.ModelAdmin):
     readonly_fields = ('created_on','updated_on','id')
 
     def get_ordering(self, request):
-        return ['-created_on']  # sort case insensitive
+        return ['-created_on']
 
 class ProfileAdmin(admin.ModelAdmin):
     readonly_fields = ('created_on','updated_on','id')

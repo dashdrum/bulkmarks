@@ -13,15 +13,9 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
-from django.contrib import admin
-
-from .views import IndexView
+from django.conf.urls import url
+from .views import (SignupQuickCreateView,)
 
 urlpatterns = [
-    url(r'^a/', admin.site.urls),
-    url(r'^l/', include('links.urls')),
-    url(r'^m/', include('marketing.urls')),
-
-    url(r'^$',IndexView.as_view(),name='index'),
+    url(r'^signup/$', SignupQuickCreateView.as_view(), name='signupquick'),
 ]
