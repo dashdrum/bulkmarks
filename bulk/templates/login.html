@@ -1,15 +1,15 @@
 {% extends "bulk_base.html" %}
 
-{% block title %}{{ block.super }} - Login{% endblock title %}
+{% block title %}{{ block.super }} - Sign In{% endblock title %}
 
 {% block contentheader %}
-    <h1>Please Login</h1>
+    <h1>Please Sign In</h1>
 {% endblock contentheader %}
 
 {% block content %}
 
 {% if form.errors %}
-	<p>Your username and password didn't match. Please try again.</p>
+	<p>Your username and password combination did not match any entry here. Please try again.</p>
 {% endif %}
 
 <div id="login_id">
@@ -30,3 +30,5 @@
 </form>
 </div>
 {% endblock %}
+
+{% block nav_items %}{% endblock nav_items %}

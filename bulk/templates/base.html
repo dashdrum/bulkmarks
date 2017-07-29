@@ -39,7 +39,7 @@
 </head>
 <body>
 
-<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+<nav class="navbar navbar-default" role="navigation">
 	<div class="container" id="app-navbar">
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#app-collapse">
@@ -51,6 +51,18 @@
 			{% block contentheader %}{% endblock contentheader %}
 		</div><!-- /.navbar-header -->
 		<div class="navbar-collapse collapse" id="navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-right">
+				{% block nav_items %}
+					<!-- {% if user.is_staff %}
+						<li><a href="{% url 'admin:index' %}" title='Admin Dashboard' id='admin_button'>Admin</a></li>
+					{% endif %} -->
+					<!-- nav items here as <li> -->
+				{% endblock nav_items %}
+				{% if user.is_authenticated %}
+	                <li><a href="{% url 'logout' %}">{{ user.get_username|upper }} Sign Out</a></li>
+	            {% else %}
+	                <li><a href="{% url 'login' %}">Sign In</a></li>
+	            {% endif %}
 
 			</ul>
 		</div><!-- /.navbar-collapse -->

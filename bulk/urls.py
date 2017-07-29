@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 
 from .views import IndexView
 
@@ -22,6 +23,9 @@ urlpatterns = [
     url(r'^a/', admin.site.urls),
     url(r'^l/', include('links.urls')),
     url(r'^m/', include('marketing.urls')),
+
+    url(r'^login/$', auth_views.login,{'template_name': 'login.html'},name='login'),
+    url(r'^logout/$', auth_views.logout,{'next_page': '/'},name='logout'),
 
     url(r'^$',IndexView.as_view(),name='index'),
 ]
