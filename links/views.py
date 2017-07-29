@@ -3,7 +3,7 @@ import time
 
 from django.shortcuts import render
 from django.views.generic import (FormView, TemplateView, ListView, CreateView,
-									DetailView, UpdateView, RedirectView)
+									DetailView, UpdateView, RedirectView, DeleteView)
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin,LoginRequiredMixin
 from django.http import (HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden, HttpResponseGone)
@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from braces.views import SuccessURLRedirectListMixin
 from annoying.functions import get_object_or_None
 from django.utils.timezone import make_aware, utc
+from braces.views import SuccessURLRedirectListMixin
 
 from .models import Link, Profile, InterfaceFile
 from .forms import LinkForm, ImportFileForm, ExportFileForm
@@ -87,6 +88,14 @@ class LinkUpdateView(LoginRequiredMixin,UpdateView):
 			return obj
 
 		return HttpResponseForbidden()
+
+
+class LinkDeleteView(PermissionRequiredMixin, SuccessURLRedirectListMixin, DeleteView):
+
+	permission_required = "links.delete_link"
+	raise_exception = True
+	model=Link
+	success_list_url = 'userlinks'
 
 class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 

@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from .views import (UserLinkListView, LinkDetailView, LinkCreateView, LinkUpdateView,
                     UploadImportFileTemplateView, TestLinkView, VisitLinkView,
-                    ExportLinksView)
+                    ExportLinksView, LinkDeleteView)
 
 urlpatterns = [
     url(r'^userlinks/$', UserLinkListView.as_view(), name='userlinks'),
@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^linkvisit/(?P<pk>[0-9A-Fa-f-]+)/$',VisitLinkView.as_view(),name='linkvisit'),
     url(r'^linkdetail/(?P<pk>[0-9A-Fa-f-]+)/$',LinkDetailView.as_view(),name='linkdetail'),
     url(r'^linkupdate/(?P<pk>[0-9A-Fa-f-]+)/$',LinkUpdateView.as_view(),name='linkupdate'),
+    url(r'^linkdelete/(?P<pk>[0-9A-Fa-f-]+)/$',LinkDeleteView.as_view(),name='linkdelete'),
     url(r'^linktest/(?P<pk>[0-9A-Fa-f-]+)/$',TestLinkView.as_view(),name='linktest'),
     url(r'^import/$', UploadImportFileTemplateView.as_view(), name='import'),
     url(r'^export/$', ExportLinksView.as_view(), name='export'),
