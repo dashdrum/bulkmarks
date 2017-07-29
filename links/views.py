@@ -347,7 +347,7 @@ def export_links_to_delicious(profile_id):
 
 	profile = get_object_or_None(Profile,id=profile_id)
 
-	queryset = Link.objects.filter(profile=profile)
+	queryset = Link.objects.filter(profile=profile).order_by('-created_on')
 
 	filename = profile.user.username + '.html'
 
