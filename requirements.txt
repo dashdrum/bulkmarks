@@ -7,3 +7,4 @@ djangorestframework
 django-debug-toolbar
 gunicorn
 git+http://github.com/dashdrum/django-heartbeat.git#egg=django-heartbeat
+bsr

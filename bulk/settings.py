@@ -17,17 +17,18 @@ from os import environ
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+DEBUG = bool(environ.get('DJANGO_DEBUG', True))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
+SECRET_KEY = environ.get('DJANGO_SECRET_KEY',None)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'o-jhxtt-7f&$x6*yb8=cexcrn=3w0p(^7g3t%gl6tt*1d8ze5h'
+if DEBUG and not SECRET_KEY:
+    SECRET_KEY = 'o-jhxtt-7f&$x6*yb8=cexcrn=3w0p(^7g3t%gl6tt*1d8ze5h'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = environ.get('DJANGO_ALLOWED_HOSTS',[])
+if ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ALLOWED_HOSTS.split(',')
+else:
+    ALLOWED_HOSTS = ['*']
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/l/userlinks/'
@@ -43,6 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework',
+    'heartbeat',
 
     'links',
     'marketing',
@@ -128,3 +132,49 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (
+    join(BASE_DIR, "dupe/static"),
+)
+
+if DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+else:
+    STATIC_ROOT = environ['DJANGO_STATIC_ROOT']
+
+## Whitenoise - Insert in 2nd place after SecurityMiddleware
+
+MIDDLEWARE.insert(1,'whitenoise.middleware.WhiteNoiseMiddleware')
+
+# Add app before django.contrib.staticfiles to enable Whitenoise in development
+
+for i, app in enumerate(INSTALLED_APPS):
+    if app == 'django.contrib.staticfiles':
+        insert_point = i
+INSTALLED_APPS.insert(insert_point,'whitenoise.runserver_nostatic')
+
+# DRF Settings
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'links.permissions.DjangoViewModelPermissions',
+    )
+}
+
+
+#-----------------------------------------------------------------------------#
+#
+#    Heartbeat settings
+#
+
+if 'heartbeat' in INSTALLED_APPS:
+    HEARTBEAT = {
+      'package_name': 'bulk',
+      'checkers': [
+          'heartbeat.checkers.databases',  ## Will check the DB connection
+      ],
+      'auth': {'authorized_ips': ('127.0.0.1','10.0.0.0/8'),},
+    }
+
+#
+#-----------------------------------------------------------------------------#
