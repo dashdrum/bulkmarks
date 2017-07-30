@@ -17,8 +17,6 @@
 
 {% block content %}
 
-  <p>Hello</p><p>Hello</p>
-
 <div class="row">
 	<div id="linkInformation" class="col-md-10 col-md-offset-1">
 		<p><label for="title">Title:</label> {{ object.title }}</p>
@@ -36,5 +34,6 @@
 {% endblock content %}
 
 {% block nav_items %}
+<li><a href="{% url 'userlinks' %}">{{ user.get_username|capfirst }}'s Links</a></li>
 {{ block.super }}
 {% endblock nav_items %}

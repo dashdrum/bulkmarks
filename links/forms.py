@@ -10,7 +10,7 @@ from .models import Link, Profile
 from .choices import IMPORT_TYPE_CHOICES
 
 def get_title(url):
-	soup = BeautifulSoup(urllib.request.urlopen(url))
+	soup = BeautifulSoup(urllib.request.urlopen(url),"html.parser")
 	return soup.title.string.encode('utf-8')
 
 class LinkForm(ModelForm):

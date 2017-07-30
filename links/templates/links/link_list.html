@@ -8,14 +8,13 @@
 {% block content %}
 <div class="row">
   <div class="col-md-10 col-md-offset-1">
-  <p>Hello</p><p>Hello</p>
   <dl>
   {% for o in object_list %}
   	<div class="link">
   		<dt><a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
   		{% if o.comment %}
   			<dd>{{ o.comment }}</dd>
-  		{% endif %} (<a href="{% url 'linkdetail' o.id %}">Detail</a>)
+  		{% endif %} (<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
   	</div>
   {% endfor %}
   </dl>

@@ -11,5 +11,8 @@
 {% block title %}Bulkmarks{% endblock title %}
 
 {% block nav_items %}
-
+{{ block.super }}
+<li><a href="{% url 'linkcreate' %}">Add Link</a></li>
+<li><a href="{% url 'import' %}">Import</a></li>
+<li><a href="{% url 'export' %}">Export</a></li>
 {% endblock nav_items %}
