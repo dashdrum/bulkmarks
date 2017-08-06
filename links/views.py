@@ -11,13 +11,21 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.utils.timezone import make_aware, utc
+from django.utils.html import escape
+from django.db import IntegrityError
+
 from braces.views import SuccessURLRedirectListMixin
 from annoying.functions import get_object_or_None
-from django.utils.timezone import make_aware, utc
-from braces.views import SuccessURLRedirectListMixin
+
+from rest_framework import (viewsets, status)
+from rest_framework.views import APIView
+from rest_framework.response import Response
+# from .serializers import ZgvpidmtabSerializer, MergeLogSerializer
 
 from .models import Link, Profile, InterfaceFile
 from .forms import LinkForm, ImportFileForm, ExportFileForm
+from .forms import get_title
 
 def get_profile(user):
 	try:
@@ -63,12 +71,18 @@ class LinkCreateView(LoginRequiredMixin,CreateView):
 		return reverse('userlinks')
 
 	def form_valid(self, form):
-		user = User.objects.get(username = 'dgentry')
-		profile = Profile.objects.get(user = user)
-		self.object = form.save(commit=False)
-		self.object.profile = profile
-		self.object.save()
-		return HttpResponseRedirect(self.get_success_url())
+		user = self.request.user
+		profile = get_profile(user)
+		try:
+			# Save object and show success
+			self.object = form.save(commit=False)
+			self.object.profile = profile
+			self.object.save()
+			return HttpResponseRedirect(self.get_success_url())
+		except IntegrityError as e:
+			# Add the error to the form and send it back
+			form.add_error('url','URL has already been saved')
+			return self.render_to_response(self.get_context_data(form=form))
 
 
 class LinkUpdateView(LoginRequiredMixin,UpdateView):
@@ -405,3 +419,112 @@ def export_links_to_delicious(profile_id):
 
 	return instance.id
 
+###############################################################################
+#																			  #
+#  A P I 																	  #
+#																			  #
+###############################################################################
+
+
+
+class GetTitleAPIView(APIView):
+
+	''' Return the title from a URL '''
+
+	queryset = Link.objects.all() ## Needs a queryset for permissions to work
+
+	def get(self, request, *args, **kwargs):
+
+		url = request.GET.get('URL',None)
+
+		error_code = None
+
+		if not url: ## Something is missing
+			return Response(status=status.HTTP_400_BAD_REQUEST,
+				            data={"error_code": '400', "error_message": 'Missing URL'})
+
+		title, error_code = get_title(url)
+
+		if not title: ## no title returned
+			return Response(status=error_code,
+				            data={'error_code': error_code, 'error_message': 'No title returned'})
+
+		return Response(status=status.HTTP_200_OK, data={"title": title})
+
+
+class AddURLAPIView(APIView):
+
+	''' Creates a new link row with the given URL '''
+
+	queryset = Link.objects.all() ## Needs a queryset for permissions to work
+
+	def post(self, request, *args, **kwargs):
+
+		url = request.POST.get('URL',None)
+
+		error_code = None
+
+		if url is None: ## Something is missing
+			return Response(status=status.HTTP_400_BAD_REQUEST,
+				            data={"error_code": '400', "error_message": 'Missing URL'})
+
+		title, error_code = get_title(url)
+
+		if not title: ## no title returned
+			# return Response(status=error_code,
+			# 	            data={'error_code': error_code, 'error_message': 'No title returned'})
+			title = escape(url)
+
+		user = self.request.user
+		profile = get_profile(user)
+
+		try:
+			instance = Link(title=title,url=url,profile=profile)
+			instance.save()
+		except IntegrityError as e:
+			return Response(status=status.HTTP_409_CONFLICT,
+							data={'error_code':e.code,'error_message':e.reason})
+		except:
+			return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+				            data={'error_code': '422', 'error_message': 'Link not saved'})
+
+		return Response(status=status.HTTP_200_OK, data={"title": title})
+
+		## Test with: curl -v --data-ascii URL="http://nmc.edu" http://localhost:8000/l/api/addurl/
+
+
+
+class TestLinkAPIView(APIView):
+
+	''' Creates a new link row with the given URL '''
+
+	queryset = Link.objects.all() ## Needs a queryset for permissions to work
+
+	def get_object(self,id):
+
+		try:
+			object = self.queryset.get(id = id)
+		except Link.DoesNotExist:
+			return Http404
+
+		user = self.request.user
+
+		if user != object.profile.user:
+			return HttpResponseForbidden()
+
+		return object
+
+	def put(self, request, *args, **kwargs):
+
+		id = request.POST.get('ID',None)
+
+		link = self.get_object(id)
+
+		url = request.POST.get('URL',None)
+
+		status = test_link(link.id)
+
+		if status:
+			return Response(status=status.HTTP_200_OK, data={"status": status,"tested_on": datetime.now()})
+		else:
+			return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)

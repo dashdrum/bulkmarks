@@ -156,9 +156,11 @@ INSTALLED_APPS.insert(insert_point,'whitenoise.runserver_nostatic')
 # DRF Settings
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'links.permissions.DjangoViewModelPermissions',
-    )
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'links.permissions.DjangoViewModelPermissions',
+    # ),
+    'DEFAULT_PERMISSION_CLASSES': [],
+
 }
 
 

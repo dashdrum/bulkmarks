@@ -16,7 +16,8 @@ Including another URLconf
 from django.conf.urls import url
 from .views import (UserLinkListView, LinkDetailView, LinkCreateView, LinkUpdateView,
                     UploadImportFileTemplateView, TestLinkView, VisitLinkView,
-                    ExportLinksView, LinkDeleteView)
+                    ExportLinksView, LinkDeleteView,)
+from .views import (GetTitleAPIView, AddURLAPIView, TestLinkAPIView,)
 
 urlpatterns = [
     url(r'^userlinks/$', UserLinkListView.as_view(), name='userlinks'),
@@ -28,4 +29,10 @@ urlpatterns = [
     url(r'^linktest/(?P<pk>[0-9A-Fa-f-]+)/$',TestLinkView.as_view(),name='linktest'),
     url(r'^import/$', UploadImportFileTemplateView.as_view(), name='import'),
     url(r'^export/$', ExportLinksView.as_view(), name='export'),
+
+    ## API
+
+    url(r'^api/gettitle/$',GetTitleAPIView.as_view(),name='gettitle'),
+    url(r'^api/addurl/$',AddURLAPIView.as_view(),name='addurl'),
+    url(r'^api/testlink/$',TestLinkAPIView.as_view(),name='testlink'),
 ]

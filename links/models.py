@@ -34,6 +34,7 @@ class Link(ModelBase):
 
 	class Meta:
 		permissions = (('view_links', "Can view links"),)
+		unique_together = ('url','profile')
 
 	class Admin:
 		pass
