@@ -9,15 +9,17 @@ from django.conf import settings
 
 from datetime import datetime
 try:
-    from django.utils.timezone import now
+	from django.utils.timezone import now
 except ImportError:
-    from datetime.datetime import now
+	from datetime.datetime import now
+
+from .utils import get_title
 
 import uuid
 
 class Link(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	title = models.CharField(max_length=200,blank=False,null=False)
+	title = models.CharField(max_length=200,blank=True,null=False)
 	url = models.URLField(max_length=400,blank=False,null=False)
 	comment = models.TextField(max_length=1000, null=True, blank=True)
 	public = models.BooleanField(default=True)
@@ -31,6 +33,18 @@ class Link(ModelBase):
 
 	def __str__(self):
 		return self.title
+
+	def save(self,*args, **kwargs):
+		''' If title is empty, try to get a title from the page
+			A null value returned by get_title will trigger the field required
+			error '''
+
+		error_code = None
+
+		if self.title is None:
+			self.title, error_code = get_title(self.url)
+
+		super(Link, self).save(*args, **kwargs)
 
 	class Meta:
 		permissions = (('view_links', "Can view links"),)

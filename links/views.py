@@ -6,7 +6,8 @@ from django.views.generic import (FormView, TemplateView, ListView, CreateView,
 									DetailView, UpdateView, RedirectView, DeleteView)
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin,LoginRequiredMixin
-from django.http import (HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden, HttpResponseGone)
+from django.http import (HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden, HttpResponseGone,
+	                     HttpResponseBadRequest)
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -19,13 +20,15 @@ from braces.views import SuccessURLRedirectListMixin
 from annoying.functions import get_object_or_None
 
 from rest_framework import (viewsets, status)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-# from .serializers import ZgvpidmtabSerializer, MergeLogSerializer
+from rest_framework.generics import CreateAPIView, UpdateAPIView
 
+from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from .models import Link, Profile, InterfaceFile
 from .forms import LinkForm, ImportFileForm, ExportFileForm
-from .forms import get_title
+from .utils import get_title
 
 def get_profile(user):
 	try:
@@ -425,6 +428,19 @@ def export_links_to_delicious(profile_id):
 #																			  #
 ###############################################################################
 
+class ProfileCheckMixin(object):
+
+	def get_object(self):
+
+		obj = super(ProfileCheckMixin,self).get_object()
+
+		user = self.request.user
+		user = User.objects.get(username='dgentry') ## Temp user assignment
+
+		if user != obj.profile.user:
+			return HttpResponseForbidden()
+
+		return obj
 
 
 class GetTitleAPIView(APIView):
@@ -451,80 +467,63 @@ class GetTitleAPIView(APIView):
 
 		return Response(status=status.HTTP_200_OK, data={"title": title})
 
-
-class AddURLAPIView(APIView):
+class AddURLAPIView(CreateAPIView):
 
 	''' Creates a new link row with the given URL '''
 
-	queryset = Link.objects.all() ## Needs a queryset for permissions to work
+	queryset = Link.objects.all()
+	serializer_class = AddURLLinkSerializer
+	# permission_classes = (IsAuthenticated,)
 
-	def post(self, request, *args, **kwargs):
+	def perform_create(self, serializer):
 
-		url = request.POST.get('URL',None)
-
-		error_code = None
-
-		if url is None: ## Something is missing
-			return Response(status=status.HTTP_400_BAD_REQUEST,
-				            data={"error_code": '400', "error_message": 'Missing URL'})
-
-		title, error_code = get_title(url)
-
-		if not title: ## no title returned
-			# return Response(status=error_code,
-			# 	            data={'error_code': error_code, 'error_message': 'No title returned'})
-			title = escape(url)
-
-		user = self.request.user
+		# user = self.request.user
+		user = User.objects.get(username='dgentry')
 		profile = get_profile(user)
 
-		try:
-			instance = Link(title=title,url=url,profile=profile)
-			instance.save()
-		except IntegrityError as e:
-			return Response(status=status.HTTP_409_CONFLICT,
-							data={'error_code':e.code,'error_message':e.reason})
-		except:
-			return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY,
-				            data={'error_code': '422', 'error_message': 'Link not saved'})
+		# try:
+		serializer.save(profile=profile)
+		# except IntegrityError:
+		# 	return HttpResponseBadRequest
 
-		return Response(status=status.HTTP_200_OK, data={"title": title})
-
-		## Test with: curl -v --data-ascii URL="http://nmc.edu" http://localhost:8000/l/api/addurl/
+	# 	## Test with: curl -v --data-ascii url="http://nmc.edu" http://localhost:8000/l/api/addurl/
 
 
 
-class TestLinkAPIView(APIView):
+class TestLinkAPIView(ProfileCheckMixin,UpdateAPIView):
 
-	''' Creates a new link row with the given URL '''
+	''' Creates a new link row with the given URL  THIS DOES NOT WORK YET '''
 
-	queryset = Link.objects.all() ## Needs a queryset for permissions to work
+	queryset = Link.objects.all()
+	serializer = TestLinkSerializer
+	lookup_field = 'id'
 
-	def get_object(self,id):
+	def get_object(self):
 
-		try:
-			object = self.queryset.get(id = id)
-		except Link.DoesNotExist:
-			return Http404
+		obj = super(TestLinkAPIView,self).get_object()
 
-		user = self.request.user
+		self.status = test_link(obj.id)
+		self.tested_on = datetime.now()
 
-		if user != object.profile.user:
-			return HttpResponseForbidden()
+	def perform_update(self, serializer):
+		serializer.save(status=self.status,tested_on=self.tested_on)
 
-		return object
+	# def patch(self, request, *args, **kwargs):
 
-	def put(self, request, *args, **kwargs):
+	# 	obj = self.get_object()
 
-		id = request.POST.get('ID',None)
+	# 	status = test_link(obj.id)
+	# 	tested_on = datetime.now()
 
-		link = self.get_object(id)
+	# 	print('status:', status)
+	# 	print('tested_on:', tested_on)
 
-		url = request.POST.get('URL',None)
+	# 	## How to I get these values in?
 
-		status = test_link(link.id)
+	# 	return super(TestLinkAPIView,self).patch(request, *args, **kwargs)
 
-		if status:
-			return Response(status=status.HTTP_200_OK, data={"status": status,"tested_on": datetime.now()})
-		else:
-			return Response(status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+	## Test with: curl --header "Content-Type:application/json" --header "Accept: application/json" --request PATCH --data '{"id":"830fb618-d401-4b9a-9d0e-f238d8dd31b0"}' http://localhost:8000/l/api/testlink/
+	##  (replace with desired ID)
+
+
+
