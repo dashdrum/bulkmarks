@@ -1,0 +1,21 @@
+vagrant@vagrant-debian-squeeze:~$ sudo su - postgres
+postgres@vagrant-debian-squeeze:~$ psql
+psql (9.3beta2)
+Type "help" for help.
+
+postgres=# CREATE DATABASE bulk;
+CREATE DATABASE
+postgres=# CREATE USER bulk WITH PASSWORD 'bulk';
+CREATE ROLE
+postgres=# ALTER ROLE bulk SET client_encoding TO 'utf8';
+ALTER ROLE
+postgres=# ALTER ROLE bulk SET default_transaction_isolation TO 'read committed';
+ALTER ROLE
+postgres=# ALTER ROLE bulk SET timezone TO 'UTC';
+ALTER ROLE
+postgres=# GRANT ALL PRIVILEGES ON DATABASE bulk TO bulk;
+GRANT
+postgres=# \q
+postgres@vagrant-debian-squeeze:~$ exit
+logout
+vagrant@vagrant-debian-squeeze:~$

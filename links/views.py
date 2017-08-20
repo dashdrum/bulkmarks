@@ -36,6 +36,7 @@ def get_profile(user):
 		return profile
 	except:
 		profile = Profile(user=user,display_name=user.username,email=user.email)
+		profile.save()
 		return profile
 
 class UserLinkListView(LoginRequiredMixin,ListView):
@@ -260,7 +261,7 @@ def import_links_from_file(import_file_id):
 		def handle_data(self, data):
 			if data != '\n':
 				if self.current_tag == 'a':
-					self.current_link.title = data
+					self.current_link.title = data[:200]
 				elif self.current_tag == 'dd':
 					self.current_link.comment = data
 
@@ -268,18 +269,22 @@ def import_links_from_file(import_file_id):
 
 	try:
 		import_obj = get_object_or_None(InterfaceFile, id = import_file_id)
+		print('Import file:', import_obj)
 		profile = import_obj.profile
+		print('Profile:', profile)
 	except:
 		# raise some sort of error
+		print('get error')
 		import_status = 'E'
 
 	parser = MyHTMLParser()
 
 	if not import_status:
 		try:
-			parser.feed(import_obj.import_text)
+			parser.feed(import_obj.text)
 			import_status = 'Y'
 		except:
+			print('parser error')
 			import_status = 'E'
 
 	import_obj.status = import_status
