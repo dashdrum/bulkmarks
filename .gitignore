@@ -151,6 +151,9 @@ staticfiles
 
 #Project Specific ################################
 
+## Add entry for any other instances in use
+bulk/settings/devl.py
+
 deliciou*.html
 db.sqlite3
 links/link_screenshot.png

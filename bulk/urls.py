@@ -29,3 +29,20 @@ urlpatterns = [
 
     url(r'^$',IndexView.as_view(),name='index'),
 ]
+
+###  Django Debug Toolbar
+
+from django.conf import settings
+
+if 'debug_toolbar' in settings.INSTALLED_APPS:
+    from debug_toolbar import urls as debug_urls
+    urlpatterns.append(url(r'^__debug__',include(debug_urls)))
+
+### Heartbeat
+
+if 'heartbeat' in settings.INSTALLED_APPS:
+  from heartbeat.urls import urlpatterns as heartbeat_urls
+
+  urlpatterns += [
+    url(r'^heartbeat/', include(heartbeat_urls))
+  ]

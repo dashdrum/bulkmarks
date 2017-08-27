@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'heartbeat',
 
     'links',
     'marketing',
@@ -84,17 +83,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'bulk.wsgi.application'
 
 
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'bulk',
-        'USER': 'bulk',
-        'PASSWORD': 'bulk',
-        'HOST': 'localhost',
-        'PORT': '',
-    }
-}
 
 
 # Password validation
@@ -136,7 +124,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
-    join(BASE_DIR, "dupe/static"),
+    join(BASE_DIR, "bulk/static"),
 )
 
 if DEBUG:
@@ -170,6 +158,8 @@ REST_FRAMEWORK = {
 #
 #    Heartbeat settings
 #
+
+INSTALLED_APPS += ('heartbeat',)
 
 if 'heartbeat' in INSTALLED_APPS:
     HEARTBEAT = {
