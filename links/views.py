@@ -7,7 +7,7 @@ from django.views.generic import (FormView, TemplateView, ListView, CreateView,
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin,LoginRequiredMixin
 from django.http import (HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden, HttpResponseGone,
-	                     HttpResponseBadRequest)
+						 HttpResponseBadRequest)
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -28,16 +28,7 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from .models import Link, Profile, InterfaceFile
 from .forms import LinkForm, ImportFileForm, ExportFileForm
-from .utils import get_title
-
-def get_profile(user):
-	try:
-		profile = Profile.objects.get(user = user)
-		return profile
-	except:
-		profile = Profile(user=user,display_name=user.username,email=user.email)
-		profile.save()
-		return profile
+from .utils import get_title, get_profile, test_link
 
 class UserLinkListView(LoginRequiredMixin,ListView):
 	model = Link
@@ -292,80 +283,6 @@ def import_links_from_file(import_file_id):
 
 	return import_status
 
-#-----------------------------------------------------------------------------#
-
-def test_link(link_id):
-
-	def convert_link_status(status_code):
-
-		if status_code[0:1] == '403':
-			return 'F'
-		elif status_code[0:1] == '4':
-			return 'N'
-		elif status_code[0:1] == '3':
-			return 'R'
-		elif status_code[0:1] == '2':
-			return 'O'
-		else:
-			return 'E'
-
-	l = get_object_or_None(Link, id = link_id)
-	if l is not None:
-		try:
-			status_code = get_link_status(l.url)
-			if status_code is not None:
-				l.status = convert_link_status(str(status_code))
-				l.tested_on = datetime.now(utc)
-				l.save()
-				return l.status
-		except:
-			l.status = 'E'
-			l.tested_on = datetime.now(utc)
-			l.save()
-	return None
-
-
-from http.client import HTTPSConnection, HTTPConnection
-import socket
-
-def get_link_status(url):
-	"""
-	Gets the HTTP status of the url
-	"""
-	https=False
-	#url=re.sub(r'(.*)#.*$',r'\1',url)
-	url=url.split('/',3)
-	if len(url) > 3:
-		path='/'+url[3]
-	else:
-		path='/'
-	if url[0] == 'http:':
-		port=80
-	elif url[0] == 'https:':
-		port=443
-		https=True
-	if ':' in url[2]:
-		host=url[2].split(':')[0]
-		port=url[2].split(':')[1]
-	else:
-		host=url[2]
-	try:
-		headers={'User-Agent':'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:26.0) Gecko/20100101 Firefox/26.0',
-				 'Host':host}
-		if https:
-			conn=HTTPSConnection(host=host,port=port,timeout=10)
-		else:
-			conn=HTTPConnection(host=host,port=port,timeout=10)
-		conn.request(method="HEAD",url=path,headers=headers)
-		response=str(conn.getresponse().status)
-		conn.close()
-		return response
-	except:
-		pass
-
-	## something failed
-	return '500'
-
 
 
 
@@ -462,13 +379,13 @@ class GetTitleAPIView(APIView):
 
 		if not url: ## Something is missing
 			return Response(status=status.HTTP_400_BAD_REQUEST,
-				            data={"error_code": '400', "error_message": 'Missing URL'})
+							data={"error_code": '400', "error_message": 'Missing URL'})
 
 		title, error_code = get_title(url)
 
 		if not title: ## no title returned
 			return Response(status=error_code,
-				            data={'error_code': error_code, 'error_message': 'No title returned'})
+							data={'error_code': error_code, 'error_message': 'No title returned'})
 
 		return Response(status=status.HTTP_200_OK, data={"title": title})
 
@@ -480,52 +397,19 @@ class AddURLAPIView(CreateAPIView):
 	serializer_class = AddURLLinkSerializer
 	# permission_classes = (IsAuthenticated,)
 
-	def perform_create(self, serializer):
-
-		# user = self.request.user
-		user = User.objects.get(username='dgentry')
-		profile = get_profile(user)
-
-		# try:
-		serializer.save(profile=profile)
-		# except IntegrityError:
-		# 	return HttpResponseBadRequest
-
 	# 	## Test with: curl -v --data-ascii url="http://nmc.edu" http://localhost:8000/l/api/addurl/
 
 
 
 class TestLinkAPIView(ProfileCheckMixin,UpdateAPIView):
 
-	''' Creates a new link row with the given URL  THIS DOES NOT WORK YET '''
+	''' Tests the URL '''
+
+	## AssertionError: Expected view TestLinkAPIView to be called with a URL keyword argument named "id". Fix your URL conf, or set the `.lookup_field` attribute on the view correctly.
 
 	queryset = Link.objects.all()
 	serializer = TestLinkSerializer
 	lookup_field = 'id'
-
-	def get_object(self):
-
-		obj = super(TestLinkAPIView,self).get_object()
-
-		self.status = test_link(obj.id)
-		self.tested_on = datetime.now()
-
-	def perform_update(self, serializer):
-		serializer.save(status=self.status,tested_on=self.tested_on)
-
-	# def patch(self, request, *args, **kwargs):
-
-	# 	obj = self.get_object()
-
-	# 	status = test_link(obj.id)
-	# 	tested_on = datetime.now()
-
-	# 	print('status:', status)
-	# 	print('tested_on:', tested_on)
-
-	# 	## How to I get these values in?
-
-	# 	return super(TestLinkAPIView,self).patch(request, *args, **kwargs)
 
 	## Test with: curl --header "Content-Type:application/json" --header "Accept: application/json" --request PATCH --data '{"id":"830fb618-d401-4b9a-9d0e-f238d8dd31b0"}' http://localhost:8000/l/api/testlink/
 	##  (replace with desired ID)

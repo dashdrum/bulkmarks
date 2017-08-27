@@ -13,7 +13,7 @@ try:
 except ImportError:
 	from datetime.datetime import now
 
-from .utils import get_title
+# from .utils import get_title
 
 import uuid
 
