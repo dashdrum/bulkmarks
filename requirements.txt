@@ -1,11 +1,15 @@
-django>=1.9
-git+http://github.com/dashdrum/dashdrum-django-snips.git#egg=dashdrum-django-snips
+## mkvirtualenv -p /usr/local/bin/python3 bulk
+
+beautifulsoup4
 django-annoying
 django-braces
-psycopg2
-whitenoise
-djangorestframework
 django-debug-toolbar
-gunicorn
+django-heartbeat
+django>=1.9
+djangorestframework
+git+http://github.com/dashdrum/dashdrum-django-snips.git#egg=dashdrum-django-snips
 git+http://github.com/dashdrum/django-heartbeat.git#egg=django-heartbeat
-beautifulsoup4
+gunicorn
+psycopg2
+urllib3
+whitenoise

@@ -14,6 +14,7 @@ except ImportError:
 	from datetime.datetime import now
 
 # from .utils import get_title
+from .choices import LINK_STATUS_CHOICES, IMPORT_TYPE_CHOICES
 
 import uuid
 
@@ -23,13 +24,20 @@ class Link(ModelBase):
 	url = models.URLField(max_length=400,blank=False,null=False)
 	comment = models.TextField(max_length=1000, null=True, blank=True)
 	public = models.BooleanField(default=True)
-	status = models.CharField(max_length=1,blank=True,null=True) # Not found, OK, Redirect, Error
+	status = models.CharField(max_length=1,blank=True,null=True,choices = LINK_STATUS_CHOICES)
 	profile = models.ForeignKey('Profile',null=False,blank=False)
 	tested_on = models.DateTimeField(blank=True,null=True)
 
 	@property
 	def user(self):
 		return self.profile.user
+
+	@property
+	def status_label(self):
+		try:
+			return dict(LINK_STATUS_CHOICES)[self.status]
+		except KeyError:
+			return self.status
 
 	def __str__(self):
 		return self.title
@@ -78,8 +86,15 @@ class InterfaceFile(ModelBase):
 	file_name = models.CharField(max_length=500,null=True,blank=True)
 	file_type = models.CharField(max_length=1, null=False,blank=False)
 	text = models.TextField(null=False,blank=True)
-	file_format = models.CharField(max_length=1,null=False,blank=False) # Delicious, others TBA - maybe OPML and HTML
+	file_format = models.CharField(max_length=1,null=False,blank=False, choices = IMPORT_TYPE_CHOICES)
 	status = models.CharField(max_length=1,null=False,blank=False,default='N') # No, Yes, Error
+
+	@property
+	def file_format_label(self):
+		try:
+			return dict(IMPORT_TYPE_CHOICES)[self.file_format]
+		except KeyError:
+			return self.file_format
 
 	def __str__(self):
 		return self.profile.display_name + ' ' + self.created_on.strftime('%Y-%m-%d %H:%M:%S')

@@ -22,7 +22,7 @@
 		<p><label for="title">Title:</label> {{ object.title }}</p>
 		<p><label for="url">URL:</label> {{ object.url }}</p>
 		{% if object.status %}
-			<p><label for="status">Previous Status:</label> {{object.status}} as of {{ object.tested_on}}</p>
+			<p><label for="status">Previous Status:</label> {{object.status_label}} as of {{ object.tested_on}}</p>
 		{% endif %}
 		<p><label for="status_code">Status Code Returned:</label> {{ link_status_code}}</p>
 

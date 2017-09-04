@@ -1,5 +1,9 @@
 ''' Shared utility functions '''
 
+from datetime import datetime
+
+from django.utils.timezone import make_aware, utc
+
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError, ContentTooShortError
 

@@ -29,6 +29,7 @@ from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerialize
 from .models import Link, Profile, InterfaceFile
 from .forms import LinkForm, ImportFileForm, ExportFileForm
 from .utils import get_title, get_profile, test_link
+from .choices import LINK_STATUS_CHOICES
 
 class UserLinkListView(LoginRequiredMixin,ListView):
 	model = Link
@@ -38,9 +39,17 @@ class UserLinkListView(LoginRequiredMixin,ListView):
 	def get_queryset(self):
 		user = self.request.user
 		#print('User:', user)
-		profile = get_profile(user)
-		self.queryset = Link.objects.filter(profile=profile)
+		self.profile = get_profile(user)
+		self.queryset = Link.objects.filter(profile=self.profile)
 		return super(UserLinkListView,self).get_queryset()
+
+	def get_context_data(self, **kwargs):
+
+		context = super(UserLinkListView,self).get_context_data(**kwargs)
+
+		context['display_name'] = self.profile.display_name
+
+		return context
 
 
 class LinkDetailView(LoginRequiredMixin,DetailView):
@@ -178,7 +187,11 @@ class TestLinkView(LoginRequiredMixin,DetailView):
 	def get_context_data(self, **kwargs):
 		context = super(TestLinkView,self).get_context_data(**kwargs)
 
-		context['link_status_code'] = test_link(self.object.id)
+		link_status = test_link(self.object.id)
+		try:
+			context['link_status_code'] = dict(LINK_STATUS_CHOICES)[link_status]
+		except KeyError:
+			context['link_status_code'] = link_status
 
 		return context
 
