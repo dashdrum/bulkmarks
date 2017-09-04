@@ -151,8 +151,9 @@ staticfiles
 
 #Project Specific ################################
 
-## Add entry for any other instances in use
+## Add entry for any other instances in use (OK to leave local*.env and local*.py)
 bulk/settings/devl.py
+devl.env
 
 deliciou*.html
 db.sqlite3
