@@ -6,6 +6,7 @@ from django.utils.timezone import make_aware, utc
 
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError, ContentTooShortError
+from http.client import RemoteDisconnected
 
 from bs4 import BeautifulSoup
 from annoying.functions import get_object_or_None
@@ -41,6 +42,8 @@ def get_title(url):
 		error_code = '400'
 	except ContentTooShortError as e:
 		error_code = 500
+	except RemoteDisconnected as e:
+		pass
 
 	return None, error_code
 

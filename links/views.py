@@ -428,4 +428,38 @@ class TestLinkAPIView(ProfileCheckMixin,UpdateAPIView):
 	##  (replace with desired ID)
 
 
+###############################################################################
+#																			  #
+#  Modal dialogs         													  #
+#																			  #
+###############################################################################
+
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+
+def link_create(request):
+	data = dict()
+
+	if request.method == 'POST':
+		form = LinkForm(request.POST)
+		user = request.user
+		profile = get_profile(user)
+		if form.is_valid():
+			object = form.save(commit=False)
+			object.profile = profile
+			object.save()
+			data['form_is_valid'] = True
+		else:
+			data['form_is_valid'] = False
+	else:
+		form = LinkForm()
+
+	context = {'form': form}
+	data['html_form'] = render_to_string('links/includes/partial_link_create.html',
+		context,
+		request=request,
+	)
+	return JsonResponse(data)
+
+
 
