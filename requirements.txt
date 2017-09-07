@@ -1,10 +1,12 @@
 ## mkvirtualenv -p /usr/local/bin/python3 bulk
 
 beautifulsoup4
+dj-database-url
 django-annoying
 django-braces
 django-debug-toolbar
 django-heartbeat
+django-widget-tweaks
 django>=1.9
 djangorestframework
 git+http://github.com/dashdrum/dashdrum-django-snips.git#egg=dashdrum-django-snips

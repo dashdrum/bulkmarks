@@ -1,0 +1,1 @@
+web: gunicorn bulk.wsgi --log-file -
