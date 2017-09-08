@@ -31,3 +31,4 @@ MIDDLEWARE += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 	DJANGO_DEBUG - Set to '' for False
 	DJANGO_ALLOWED_HOSTS - Omit for all hosts
 	DJANGO_SETTINGS_MODULE - bulk.settings.heroku-dev
+'''
