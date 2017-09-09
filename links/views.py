@@ -30,6 +30,7 @@ from .models import Link, Profile, InterfaceFile
 from .forms import LinkForm, ImportFileForm, ExportFileForm
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
+from .tasks import import_links_from_delicious, import_links_from_netscape
 
 class UserLinkListView(LoginRequiredMixin,ListView):
 	model = Link
@@ -142,7 +143,13 @@ class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 		instance.save()
 		instance.refresh_from_db()
 
-		import_links_from_file(instance.id)
+		if instance.file_format == 'D': # Delicious export file
+			import_links_from_delicious(instance.id)
+		elif instance.file_format == 'N': # Netscape Bookmark File
+			import_links_from_netscape(instance.id)
+		else:
+			instance.status = 'E' # Unknown file format
+			instance.save()
 
 		return super(UploadImportFileTemplateView,self).form_valid(form)
 
@@ -229,77 +236,7 @@ class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
 
 #-----------------------------------------------------------------------------#
 
-from html.parser import HTMLParser
-from html.entities import name2codepoint
-from datetime import datetime
 
-def import_links_from_file(import_file_id):
-
-	class MyHTMLParser(HTMLParser):
-
-		current_tag = None
-		current_link = None
-
-		def handle_starttag(self, tag, attrs):
-
-			self.current_tag = tag
-
-			if tag == 'dt':
-				if self.current_link:
-					self.current_link.save()
-				self.current_link = Link()
-				self.current_link.profile = profile
-			elif tag == 'a':
-				attr_dict = dict(attrs)
-				self.current_link.url = attr_dict.get('href',None)
-				self.current_link.public = not bool(int(attr_dict['private']))
-				self.current_link.created_on = make_aware(datetime.utcfromtimestamp(float(attr_dict['add_date'])))
-				# self.current_link.tags = attr_dict['tags']
-			elif tag == 'dd':
-				None
-
-		def handle_endtag(self,tag):
-			if tag == 'dl':
-				self.current_link.save()
-
-		def handle_data(self, data):
-			if data != '\n':
-				if self.current_tag == 'a':
-					self.current_link.title = data[:200]
-				elif self.current_tag == 'dd':
-					self.current_link.comment = data
-
-	import_status = None
-
-	try:
-		import_obj = get_object_or_None(InterfaceFile, id = import_file_id)
-		print('Import file:', import_obj)
-		profile = import_obj.profile
-		print('Profile:', profile)
-	except:
-		# raise some sort of error
-		print('get error')
-		import_status = 'E'
-
-	parser = MyHTMLParser()
-
-	if not import_status:
-		try:
-			parser.feed(import_obj.text)
-			import_status = 'Y'
-		except:
-			print('parser error')
-			import_status = 'E'
-
-	import_obj.status = import_status
-	import_obj.save()
-
-	return import_status
-
-
-
-
-#-----------------------------------------------------------------------------#
 
 
 def export_links_to_delicious(profile_id):
