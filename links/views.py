@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.utils.timezone import make_aware, utc
 from django.utils.html import escape
 from django.db import IntegrityError
+from django.core.paginator import Page, Paginator
 
 from braces.views import SuccessURLRedirectListMixin
 from annoying.functions import get_object_or_None
@@ -32,14 +33,49 @@ from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, )
 
+class PageFive(Page):
+
+	'''
+		Include info for next 5 and previous 5 pages
+	'''
+
+	def has_next_five(self):
+		return self.number < self.paginator.num_pages + 5
+
+	def has_previous_five(self):
+		return self.number > 6
+
+	def next_five_page_number(self):
+		return self.paginator.validate_number(self.number + 5)
+
+	def previous_five_page_number(self):
+		return self.paginator.validate_number(self.number - 5)
+
+class PaginatorFive(Paginator):
+
+	'''
+		Uses the PageFive class to report info for next and
+		previous 5 pages
+
+		Set pageinator_class in ListView to use
+	'''
+
+	def _get_page(self, *args, **kwargs):
+		"""
+		Return an instance of a single page using the PageFive object
+		"""
+		return PageFive(*args, **kwargs)
+
+
+
 class UserLinkListView(LoginRequiredMixin,ListView):
 	model = Link
 	ordering =  ['-created_on']
-	paginate_by = 12
+	paginate_by = 10
+	paginator_class = PaginatorFive
 
 	def get_queryset(self):
 		user = self.request.user
-		#print('User:', user)
 		self.profile = get_profile(user)
 		self.queryset = Link.objects.filter(profile=self.profile)
 		return super(UserLinkListView,self).get_queryset()

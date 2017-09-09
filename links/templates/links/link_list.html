@@ -38,47 +38,28 @@
   </dl>
 
 
+  <!-- PaginatorFive navigation buttons -->
   {% if is_paginated %}
-  <nav>
-    <ul class="pagination">
-      {% if page_obj.has_previous %}
-        <li>
-          <a href="?page={{ page_obj.previous_page_number }}">
-            <span>Previous</span>
-          </a>
-        </li>
-      {% else %}
-        <li class="disabled">
-          <a href="#">
-            <span>Previous</span>
-          </a>
-        </li>
-      {% endif %}
+        <ul class="pagination pagination-centered">
+            {% if page_obj.has_previous %}
+                <li><a href="?page=1">1</a></li>
+                {% if page_obj.has_previous_five %}
+                    <li><a href="?page={{ page_obj.previous_five_page_number }}">Back 5</a></li>
+                {% endif %}
+                <li><a href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
+            {% endif %}
 
-      {% for page in paginator.page_range %}
-        <li {% if page == page_obj.number %}class="active"{% endif %}>
-          <a href="?page={{ page }}">{{ page }}</a>
-        </li>
-      {% endfor %}
+            <li class="active" ><a href="?page={{page_obj.number}}">{{page_obj.number}}</a></li>
 
-      {% if page_obj.has_next %}
-        <li>
-          <a href="?page={{ page_obj.next_page_number }}">
-            <span>Next</span>
-          </a>
-        </li>
-      {% else %}
-        <li {% if not page_obj.has_next %}class="disabled"{% endif %}>
-          <a href="#">
-            <span>Next</span>
-          </a>
-        </li>
-      {% endif %}
-    </ul>
-  </nav>
-{% endif %}
-  </div>
-</div>
+            {% if page_obj.has_next %}
+                <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% if page_obj.has_next_five %}
+                    <li><a href="?page={{ page_obj.next_five_page_number }}">Ahead 5</a></li>
+                {% endif %}
+                <li><a href="?page={{ page_obj.paginator.num_pages }}">{{ paginator.num_pages }}</a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
 
   <!-- THE MODAL WE WILL BE USING -->
   <div class="modal fade" id="modal-link">
