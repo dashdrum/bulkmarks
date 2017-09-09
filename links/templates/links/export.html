@@ -8,25 +8,7 @@
 {% block content %}
 <form action="." method="post" enctype="multipart/form-data"> {% csrf_token %}
 <div class="row">
-	<div id="importInfo" class="col-md-10 col-md-offset-1">
-
-		<span class='show_error'>{{ form.non_field_errors }}</span>
-
-		{% for field in form %}
-				<div class="fieldWrapper">
-					<p>
-						{% if field.errors %}<span class='show_error'>{% endif %}
-						{{ field.label_tag }}
-						{% if field.errors %}</span>{% endif %}
-						{{ field }}
-						{{ field.errors }}
-					</p>
-				</div>
-		{% endfor %}
-
-		{% if not form %}No form!!{% endif %}
-
-	</div>
+<p>Exporting links to: {{filename}}</p>
 </div>
 
 <div class="row">

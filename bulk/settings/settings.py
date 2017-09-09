@@ -124,8 +124,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-print('BASE_DIR:',BASE_DIR)
-
 STATICFILES_DIRS = (
     join(BASE_DIR, "bulk/static"),
 )

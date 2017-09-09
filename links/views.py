@@ -30,7 +30,7 @@ from .models import Link, Profile, InterfaceFile
 from .forms import LinkForm, ImportFileForm, ExportFileForm
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
-from .tasks import import_links_from_delicious, import_links_from_netscape
+from .tasks import (import_links_from_netscape, export_links_to_netscape, )
 
 class UserLinkListView(LoginRequiredMixin,ListView):
 	model = Link
@@ -143,9 +143,7 @@ class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 		instance.save()
 		instance.refresh_from_db()
 
-		if instance.file_format == 'D': # Delicious export file
-			import_links_from_delicious(instance.id)
-		elif instance.file_format == 'N': # Netscape Bookmark File
+		if instance.file_format == 'D' or instance.file_format == 'N': # Netscape Bookmark File (Used by Delicious)
 			import_links_from_netscape(instance.id)
 		else:
 			instance.status = 'E' # Unknown file format
@@ -160,11 +158,20 @@ class ExportLinksView(LoginRequiredMixin,FormView):
 	form_class = ExportFileForm
 	template_name = 'links/export.html'
 
+	def get_context_data(self, **kwargs):
+		context = super(ExportLinksView,self).get_context_data(**kwargs)
+
+		profile = get_profile(self.request.user)
+
+		context['filename'] = profile.user.username + datetime.now().strftime('-%Y-%m-%d') + '.html'
+
+		return context
+
 	def form_valid(self,form):
 
 		profile = get_profile(self.request.user)
 
-		export_id = export_links_to_delicious(get_profile(self.request.user).id)
+		export_id = export_links_to_netscape(get_profile(self.request.user).id)
 
 		file_instance = get_object_or_None(InterfaceFile,id=export_id,profile=profile)
 
@@ -233,66 +240,6 @@ class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
 			return object
 
 		return HttpResponseForbidden()
-
-#-----------------------------------------------------------------------------#
-
-
-
-
-def export_links_to_delicious(profile_id):
-
-	''' Writes link information to an HTML file using the horrible del.icio.us format '''
-
-	profile = get_object_or_None(Profile,id=profile_id)
-
-	queryset = Link.objects.filter(profile=profile).order_by('-created_on')
-
-	filename = profile.user.username + '.html'
-
-	instance = InterfaceFile()
-	instance.profile = profile
-	instance.file_format = 'D'
-	instance.file_type = 'E'  ## This is an export file
-	instance.file_name = filename
-
-	outtext = ''   ## Holds the text of the file
-
-	# Write header info
-
-	outtext += '<!DOCTYPE NETSCAPE-Bookmark-file-1>\n'
-	outtext += '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n'
-	outtext += '<TITLE>Bookmarks</TITLE>\n'
-	outtext += '<H1>Bookmarks</H1>\n'
-	outtext += '<DL><p>\n'
-
-	# Process links
-
-	for link in queryset:
-		outtext += '<DT><A HREF="'
-		outtext += link.url
-		outtext += '" ADD_DATE="'
-		outtext += str(time.mktime(link.created_on.timetuple()))
-		outtext += '" PRIVATE="'
-		outtext += str(int(not link.public)) #AWKWARD!
-		outtext += '" TAGS="'
-		outtext += ''
-		outtext += '">'
-		outtext += link.title
-		outtext += '</A>\n'
-
-		if link.comment:
-			outtext += '<DD>'
-			outtext += link.comment + '\n'
-
-	# Write footer info
-
-	outtext += '</DL><p>'
-
-	instance.text = outtext
-
-	instance.save()
-
-	return instance.id
 
 ###############################################################################
 #																			  #
