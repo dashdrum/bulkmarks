@@ -23,19 +23,33 @@
   </p>
 
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
+  <div class="col-md-7 col-md-offset-1">
 
+  <h2>Links for {{ display_name }}</h2>
 
-  <dl>
-  {% for o in object_list %}
-  	<div class="link">
-  		<dt><a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
-  		{% if o.comment %}
-  			<dd>{{ o.comment }}</dd>
-  		{% endif %} (<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
-  	</div>
-  {% endfor %}
-  </dl>
+    <dl id="link-list">
+    {% for o in object_list %}
+    	<div class="link">
+    		<dt><a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
+    		{% if o.comment %}
+    			<dd>{{ o.comment }}</dd>
+    		{% endif %} (<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
+    	</div>
+    {% endfor %}
+    </dl>
+
+  </div>
+  <div class="col-md-4">
+    <div class = "link public-link">
+      <h3>Latest Public Links</h3>
+      <dl id="latest-public">
+        {% for p in latest_public|slice:":7" %}
+          <dt><a href="{% url 'linkvisit' p.id %}" target="_blank">{{ p.title }}</a></dt>
+        {% endfor %}
+      </dl>
+    </div>
+  </div>
+</div>
 
 
   <!-- PaginatorFive navigation buttons -->

@@ -86,6 +86,8 @@ class UserLinkListView(LoginRequiredMixin,ListView):
 
 		context['display_name'] = self.profile.display_name
 
+		context['latest_public'] = Link.objects.filter(public = True).order_by('-created_on')
+
 		return context
 
 
