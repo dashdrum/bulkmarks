@@ -1,5 +1,7 @@
 {% extends "links_base.html" %}
 
+{% load widget_tweaks %}
+
 {% block title %}{{ block.super }} - Import{% endblock title %}
 
 
@@ -13,15 +15,13 @@
 		<span class='show_error'>{{ form.non_field_errors }}</span>
 
 		{% for field in form %}
-				<div class="fieldWrapper">
-					<p>
-						{% if field.errors %}<span class='show_error'>{% endif %}
-						{{ field.label_tag }}
-						{% if field.errors %}</span>{% endif %}
-						{{ field }}
-						{{ field.errors }}
-					</p>
-				</div>
+				<div class="form-group{% if field.errors %} has-error{% endif %}">
+			        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+			        {% render_field field class="form-control" %}
+			        {% for error in field.errors %}
+			          <p class="help-block">{{ error }}</p>
+			        {% endfor %}
+			     </div>
 		{% endfor %}
 
 		{% if not form %}No form!!{% endif %}

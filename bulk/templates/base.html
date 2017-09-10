@@ -16,7 +16,7 @@
 	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 
 	<!-- Optional theme -->
-	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
 
 	{% block css_shared %}{% endblock css_shared %}
 	{% block css_custom %}{% endblock css_custom %}
@@ -28,7 +28,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 	<!-- Latest compiled and minified JavaScript -->
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
     {% block js.shared %}{% endblock js.shared %}
     {% block js.custom %}{% endblock js.custom %}
@@ -39,40 +39,42 @@
 </head>
 <body>
 
-<nav class="navbar navbar-default" role="navigation">
-	<div class="container" id="app-navbar">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#app-collapse">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-			{% block contentheader %}{% endblock contentheader %}
-		</div><!-- /.navbar-header -->
-		<div class="navbar-collapse collapse" id="navbar-collapse-1">
-			<ul class="nav navbar-nav navbar-right">
-				{% block nav_items %}
-					<!-- {% if user.is_staff %}
-						<li><a href="{% url 'admin:index' %}" title='Admin Dashboard' id='admin_button'>Admin</a></li>
-					{% endif %} -->
-					<!-- nav items here as <li> -->
-				{% endblock nav_items %}
-				{% if user.is_authenticated %}
-	                <li><a href="{% url 'logout' %}">{{ user.get_username|capfirst }} Sign Out</a></li>
-	            {% else %}
-	                <li><a href="{% url 'login' %}">Sign In</a></li>
-	            {% endif %}
+<div class="container-fluid" id="main">
 
-			</ul>
-		</div><!-- /.navbar-collapse -->
-	</div><!-- /.container -->
-</nav><!-- /.navbar -->
+	<nav class="navbar navbar-default" role="navigation">
+		<div class="container" id="app-navbar">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				{% block contentheader %}{% endblock contentheader %}
+			</div><!-- /.navbar-header -->
+			<div class="navbar-collapse collapse" id="navbar-collapse-1">
+				<ul class="nav navbar-nav navbar-right">
+					{% block nav_items %}
+						{% if user.is_staff %}
+							<li><a href="{% url 'admin:index' %}" title='Admin Dashboard' id='admin_button'>Admin</a></li>
+						{% endif %}
+						<!-- nav items here as <li> -->
+					{% endblock nav_items %}
+					{% if user.is_authenticated %}
+		                <li><a href="{% url 'logout' %}">{{ user.get_username|upper }} Sign Out</a></li>
+		            {% else %}
+		                <li><a href="{% url 'login' %}">Sign In</a></li>
+		            {% endif %}
 
-<div class="container" id="main">
+				</ul>
+			</div><!-- /.navbar-collapse -->
+		</div><!-- /.container -->
+	</nav><!-- /.navbar -->
+
 	<div id="content">{% block content %}{% endblock content %}</div>
+
 	<div id="contentfooter">{% block contentfooter %}{% endblock contentfooter %}</div>
-</div>
+</div> <!-- container main -->
 
 {% block end_scripts %}
 {% endblock end_scripts %}

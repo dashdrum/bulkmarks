@@ -221,9 +221,11 @@ class ExportLinksView(LoginRequiredMixin,FormView):
 
 		# No super call needed
 
-class TestLinkView(LoginRequiredMixin,DetailView):
+class TestLinkView(LoginRequiredMixin,SingleObjectMixin, RedirectView):
+
+	''' test the link them redisplay details page '''
+
 	model = Link
-	template_name = 'links/link_test_detail.html'
 
 	def get_object(self, queryset=None):
 
@@ -236,16 +238,17 @@ class TestLinkView(LoginRequiredMixin,DetailView):
 
 		return object
 
-	def get_context_data(self, **kwargs):
-		context = super(TestLinkView,self).get_context_data(**kwargs)
+	def get_redirect_url(self, *args, **kwargs):
 
-		link_status = test_link(self.object.id)
-		try:
-			context['link_status_code'] = dict(LINK_STATUS_CHOICES)[link_status]
-		except KeyError:
-			context['link_status_code'] = link_status
+		return reverse('linkdetail', kwargs={'pk': self.object.id})
 
-		return context
+	def get(self, request, *args, **kwargs):
+
+		self.object = self.get_object()
+
+		test_link(self.object.id)
+
+		return HttpResponseRedirect(self.get_redirect_url(*args,**kwargs))
 
 class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
 

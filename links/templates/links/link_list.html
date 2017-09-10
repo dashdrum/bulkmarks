@@ -10,20 +10,22 @@
 
 {% block title %}{{ block.super }} - List{% endblock title %}
 
-
-{% block page_title %}Link List for {{ display_name}}{% endblock page_title %}
-
 {% block content %}
-<!-- BUTTON TO TRIGGER THE ACTION -->
-  <p>
-    <button type="button" class="btn btn-primary js-add-link">
-      <span class="glyphicon glyphicon-plus"></span>
-      New Link
-    </button>
-  </p>
+
+<div class="row" id="button-row">
+  <div class = "col-md-12">
+    <!-- BUTTON TO TRIGGER THE ACTION -->
+    <p>
+      <button type="button" class="btn btn-primary js-add-link">
+        <span class="glyphicon glyphicon-plus"></span>
+        New Link
+      </button>
+    </p>
+  </div> <!-- col -->
+</div> <!-- button-row -->
 
 <div class="row">
-  <div class="col-md-7 col-md-offset-1">
+  <div class="col-md-7 col-md-offset-1" id="link-container">
 
   <h2>Links for {{ display_name }}</h2>
 
@@ -32,25 +34,11 @@
     	<div class="link">
     		<dt><a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
     		{% if o.comment %}
-    			<dd>{{ o.comment }}</dd>
+    			<dd>{{ o.comment|slice:":180"}}</dd>
     		{% endif %} (<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
     	</div>
     {% endfor %}
     </dl>
-
-  </div>
-  <div class="col-md-4">
-    <div class = "link public-link">
-      <h3>Latest Public Links</h3>
-      <dl id="latest-public">
-        {% for p in latest_public|slice:":7" %}
-          <dt><a href="{% url 'linkvisit' p.id %}" target="_blank">{{ p.title }}</a></dt>
-        {% endfor %}
-      </dl>
-    </div>
-  </div>
-</div>
-
 
   <!-- PaginatorFive navigation buttons -->
   {% if is_paginated %}
@@ -74,6 +62,21 @@
             {% endif %}
         </ul>
     {% endif %}
+
+  </div> <!-- link-container -->
+
+  <div class="col-md-4">
+    <div class = "link public-link">
+      <h3>Latest Public Links</h3>
+      <dl id="latest-public">
+        {% for p in latest_public|slice:":7" %}
+          <dt><a href="{% url 'linkvisit' p.id %}" target="_blank">{{ p.title }}</a></dt>
+        {% endfor %}
+      </dl>
+    </div> <!-- public-link -->
+  </div>
+</div> <!-- row -->
+
 
   <!-- THE MODAL WE WILL BE USING -->
   <div class="modal fade" id="modal-link">

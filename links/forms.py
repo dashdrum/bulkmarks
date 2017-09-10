@@ -11,6 +11,7 @@ from .utils import get_title
 class LinkForm(ModelForm):
 
 	title = CharField(required=False)
+	comment = CharField(required=False,widget=Textarea(attrs={'rows': '3'}))
 
 	def clean(self):
 

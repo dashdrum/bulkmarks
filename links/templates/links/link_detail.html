@@ -19,19 +19,20 @@
 
 <div class="row">
 	<div id="linkInformation" class="col-md-10 col-md-offset-1">
+		<h1>Link Details</h1>
 		<p><label for="title">Title:</label> {{ object.title }}</p>
 		<p><label for="url">URL:</label> {{ object.url }}</p>
 		<p><label for="comment">Comments:</label> {{ object.comment }}</p>
 		<p><label for="public">Public Link:</label> {{ object.public }}</p>
-		{% if object.status %}
-			<p><label for="status">Status:</label> {{object.status_label}} as of {{ object.tested_on}}</p>
-		{% endif %}
 
 		<p></p>
 		<p><label for="created_on">created_on:</label> {{ object.created_on }}</p>
 		<p><label for="updated_on">updated_on:</label> {{ object.updated_on }}</p>
 		<p><label for="id">ID:</label> {{ object.id }}</p>
 		<p><label for="user">User:</label> {{ object.user }}</p>
+		{% if object.status %}
+			<p><label for="status">Status:</label> {{object.status_label}} as of {{ object.tested_on}}</p>
+		{% endif %}
 		<a href="{% url 'linkvisit' object.id %}" target="_blank">Visit</a>
 		<a href="{% url 'linkupdate' object.id %}">Edit</a>
 		<a href="{% url 'linktest' object.id %}">Test</a>
@@ -43,8 +44,3 @@
 
 
 {% endblock content %}
-
-{% block nav_items %}
-<li><a href="{% url 'userlinks' %}">{{ user.get_username|capfirst }}'s Links</a></li>
-{{ block.super }}
-{% endblock nav_items %}
