@@ -40,7 +40,7 @@ class PageFive(Page):
 	'''
 
 	def has_next_five(self):
-		return self.number < self.paginator.num_pages + 5
+		return self.number < self.paginator.num_pages - 5
 
 	def has_previous_five(self):
 		return self.number > 6
