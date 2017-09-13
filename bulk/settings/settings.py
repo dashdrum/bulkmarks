@@ -34,6 +34,7 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/l/userlinks/'
 LOGOUT_REDIRECT_URL = '/'
 
+AUTHENTICATION_BACKENDS = ('bulk.backends.CaseInsensitiveModelBackend', )
 
 # Application definition
 
