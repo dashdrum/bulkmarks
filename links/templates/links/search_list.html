@@ -1,0 +1,63 @@
+{% extends 'links_base.html' %}
+
+{% load static %}
+
+{% block js.custom %}
+
+
+
+{% endblock js.custom %}
+
+{% block title %}{{ block.super }} - Search{% endblock title %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-7 col-md-offset-1" id="link-container">
+
+  <h2>Search for: {{ search_term }}</h2>
+
+    <dl id="link-list">
+    {% for o in object_list %}
+    	<div class="link">
+    		<dt>{{ o.rank }} - <a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
+    		{% if o.comment %}
+    			<dd>{{ o.comment|slice:":180"}}</dd>
+    		{% endif %} (<a href="{% url 'linkdetail' o.id %}">Detail</a>)
+    	</div>
+    {% endfor %}
+    </dl>
+
+  <!-- PaginatorFive navigation buttons -->
+  {% if is_paginated %}
+        <ul class="pagination pagination-centered">
+            {% if page_obj.has_previous %}
+                <li><a href="?page=1">1</a></li>
+                {% if page_obj.has_previous_five %}
+                    <li><a href="?page={{ page_obj.previous_five_page_number }}">Back 5</a></li>
+                {% endif %}
+                <li><a href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
+            {% endif %}
+
+            <li class="active" ><a href="?page={{page_obj.number}}">{{page_obj.number}}</a></li>
+
+            {% if page_obj.has_next %}
+                <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% if page_obj.has_next_five %}
+                    <li><a href="?page={{ page_obj.next_five_page_number }}">Ahead 5</a></li>
+                {% endif %}
+                <li><a href="?page={{ page_obj.paginator.num_pages }}">{{ paginator.num_pages }}</a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+
+  </div> <!-- link-container -->
+
+{% endblock content %}
+
+
+
+{% block end_scripts %}
+  {{ block.super }}
+  <script src="{% static 'links/js/link.js' %}"></script>
+{% endblock end_scripts %}

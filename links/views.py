@@ -16,6 +16,7 @@ from django.utils.timezone import make_aware, utc
 from django.utils.html import escape
 from django.db import IntegrityError
 from django.core.paginator import Page, Paginator
+from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 
 from braces.views import SuccessURLRedirectListMixin
 from annoying.functions import get_object_or_None
@@ -31,7 +32,7 @@ from .models import Link, Profile, InterfaceFile
 from .forms import LinkForm, ImportFileForm, ExportFileForm
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
-from .tasks import (import_links_from_netscape, export_links_to_netscape, )
+from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, )
 
 class PageFive(Page):
 
@@ -250,6 +251,20 @@ class TestLinkView(LoginRequiredMixin,SingleObjectMixin, RedirectView):
 
 		return HttpResponseRedirect(self.get_redirect_url(*args,**kwargs))
 
+class TestAllLinksView(LoginRequiredMixin, RedirectView):
+
+	def get(self, request, *args, **kwargs):
+
+		profile = get_profile(self.request.user)
+
+		test_all_links(profile.id)
+
+		return super(TestAllLinksView, self).get(request, *args, **kwargs)
+
+	def get_redirect_url(self, *args, **kwargs):
+
+		return reverse('userlinks')
+
 class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
 
 	model = Link
@@ -281,6 +296,37 @@ class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
 			return object
 
 		return HttpResponseForbidden()
+
+class SearchLinkListView(LoginRequiredMixin,ListView):
+	model = Link
+	paginate_by = 10
+	paginator_class = PaginatorFive
+	template_name = 'links/search_list.html'
+
+	def get(self, request, *args, **kwargs):
+		#print('DATA:',self.request.GET['q'])
+		return super(SearchLinkListView, self).get(request, *args, **kwargs)
+
+	def get_queryset(self):
+		user = self.request.user
+		self.profile = get_profile(user)
+		vector = SearchVector('title','comment','url')
+		query = SearchQuery('bouzouki')
+		qs = Link.objects.filter(profile=self.profile)
+		qs = qs.annotate(search=SearchVector('url','title','comment'),)
+		qs = qs.filter(search=SearchQuery('bouzouki') | SearchQuery('tuning') | SearchQuery('chicken'))
+		self.queryset = qs
+		return self.queryset
+
+	def get_context_data(self, **kwargs):
+
+		context = super(SearchLinkListView,self).get_context_data(**kwargs)
+
+		context['display_name'] = self.profile.display_name
+
+		context['search_term'] = 'bouzouki'
+
+		return context
 
 ###############################################################################
 #																			  #

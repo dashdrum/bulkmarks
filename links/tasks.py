@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from django.db import IntegrityError, DataError
 
 from .models import InterfaceFile, Link, Profile
+from .utils import test_link
 
 
 #-----------------------------------------------------------------------------#
@@ -133,3 +134,24 @@ def export_links_to_netscape(profile_id):
 	instance.save()
 
 	return instance.id
+
+#-----------------------------------------------------------------------------#
+
+
+
+
+def test_all_links(profile_id):
+
+	profile = get_object_or_None(Profile,id=profile_id)
+
+	queryset = Link.objects.filter(profile=profile)
+
+	for link in queryset:
+
+		status = test_link(link.id)
+
+		print('Status:', status, 'Title:', link.title[:20])
+
+
+
+

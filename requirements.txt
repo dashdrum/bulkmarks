@@ -5,9 +5,8 @@ dj-database-url
 django-annoying
 django-braces
 django-debug-toolbar
-django-heartbeat
 django-widget-tweaks
-django>=1.9
+django>=1.11
 djangorestframework
 git+http://github.com/dashdrum/dashdrum-django-snips.git#egg=dashdrum-django-snips
 git+http://github.com/dashdrum/django-heartbeat.git#egg=django-heartbeat
@@ -15,3 +14,5 @@ gunicorn
 psycopg2
 urllib3
 whitenoise
+html5lib
+six
