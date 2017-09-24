@@ -66,29 +66,43 @@ class PaginatorFive(Paginator):
 		"""
 		return PageFive(*args, **kwargs)
 
-
-
-class UserLinkListView(LoginRequiredMixin,ListView):
+class PublicLinkListView(ListView):
 	model = Link
 	ordering =  ['-created_on']
 	paginate_by = 10
 	paginator_class = PaginatorFive
+	template_name = 'links/link_list.html'
+
+	def get_queryset(self):
+		self.queryset = Link.objects.filter(public=True)
+		return super(PublicLinkListView,self).get_queryset()
+
+	# def get_context_data(self, **kwargs):
+
+	# 	context = super(PublicLinkListView,self).get_context_data(**kwargs)
+
+	# 	return context
+
+
+class UserLinkListView(LoginRequiredMixin,PublicLinkListView):
 
 	def get_queryset(self):
 		user = self.request.user
 		self.profile = get_profile(user)
 		self.queryset = Link.objects.filter(profile=self.profile)
-		return super(UserLinkListView,self).get_queryset()
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+		                                   ## Yes, self is needed here
 
 	def get_context_data(self, **kwargs):
 
 		context = super(UserLinkListView,self).get_context_data(**kwargs)
 
-		context['display_name'] = self.profile.display_name
-
 		context['latest_public'] = Link.objects.filter(public = True).order_by('-created_on')
 
+		context['display_name'] = self.profile.display_name
+
 		return context
+
 
 
 class LinkDetailView(LoginRequiredMixin,DetailView):
@@ -250,7 +264,7 @@ class TestLinkView(LoginRequiredMixin,SingleObjectMixin, RedirectView):
 
 		return HttpResponseRedirect(self.get_redirect_url(*args,**kwargs))
 
-class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
+class VisitLinkView(SingleObjectMixin, RedirectView):
 
 	model = Link
 
@@ -258,14 +272,15 @@ class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
 
 		self.object = self.get_object()
 
-		test_link(self.object.id)
+		if self.object:
+			url = self.get_redirect_url(*args, **kwargs)
 
-		url = self.get_redirect_url(*args, **kwargs)
-
-		if url:
-			return HttpResponseRedirect(url)
+			if url:
+				return HttpResponseRedirect(url)
+			else:
+				return HttpResponseGone()
 		else:
-			return HttpResponseGone()
+			return HttpResponseForbidden()
 
 	def get_redirect_url(self, *args, **kwargs):
 
@@ -277,10 +292,15 @@ class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
 
 		user = self.request.user
 
+		print('User:', user)
+
+		if user == object.profile.user:
+			test_link(object.id)
+
 		if user == object.profile.user or object.public is True:
 			return object
 
-		return HttpResponseForbidden()
+		return None
 
 ###############################################################################
 #																			  #

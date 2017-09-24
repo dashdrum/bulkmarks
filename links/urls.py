@@ -16,11 +16,12 @@ Including another URLconf
 from django.conf.urls import url
 from .views import (UserLinkListView, LinkDetailView, LinkCreateView, LinkUpdateView,
 					UploadImportFileTemplateView, TestLinkView, VisitLinkView,
-					ExportLinksView, LinkDeleteView,)
+					ExportLinksView, LinkDeleteView, PublicLinkListView,)
 from .views import link_create
 from .views import (GetTitleAPIView, AddURLAPIView, TestLinkAPIView,)
 
 urlpatterns = [
+	url(r'^publiclinks/$', PublicLinkListView.as_view(), name='publiclinks'),
 	url(r'^userlinks/$', UserLinkListView.as_view(), name='userlinks'),
 	url(r'^linkcreate/$', LinkCreateView.as_view(), name='linkcreate'),
 	url(r'^linkvisit/(?P<pk>[0-9A-Fa-f-]+)/$',VisitLinkView.as_view(),name='linkvisit'),
