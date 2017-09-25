@@ -2,6 +2,8 @@
 
 {% load static %}
 
+{% load widget_tweaks %}
+
 {% block js.custom %}
 
 
@@ -13,7 +15,7 @@
 {% block content %}
 
 <div class="row" id="button-row">
-  <div class = "col-md-12">
+  <div class = "col-md-2">
     <!-- BUTTON TO TRIGGER THE ACTION -->
     <p>
       <button type="button" class="btn btn-primary js-add-link">
@@ -40,7 +42,7 @@
     		{% if o.comment %}
     			<dd>{{ o.comment|slice:":180"}}</dd>
     		{% endif %}
-        {% if display_name %}
+        {% if display_name and not other_list %}
           (<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
         {% endif %}
     	</div>
@@ -72,9 +74,10 @@
 
   </div> <!-- link-container -->
     <div class="col-md-4">
+      <div class="row">
 
     {% if display_name %}
-      <div class = "link public-link">
+      <div class = "link public-link"> <!-- show public links -->
         <h3>Latest Public Links</h3>
         <p><a href="{% url 'publiclinks' %}" title="View all public links">(view all)</a></p>
         <dl id="latest-public">
@@ -84,11 +87,31 @@
         </dl>
       </div> <!-- public-link -->
     {% endif %}
+    </div> <!-- row -->
+
     {% if not user.is_authenticated %}
-      <div class = "request-invite">
-        <p>Want to use Bulkmarks? <br>Request an invitation today.</p>
-        <a class="btn btn-primary" href="/m/signup" role="button">Request Invite</a>
-      </div>
+      <div class="row">  <!-- Signup for invite -->
+        <div class = "request-invite">
+          <p>Want to use Bulkmarks? <br>Request an invitation today.</p>
+          <a class="btn btn-primary" href="/m/signup" role="button">Request Invite</a>
+        </div>
+      </div> <!-- row -->
+    {% endif %}
+
+    {% if user.is_authenticated %}
+      <div class="row user-select"> <!-- View another user's public links -->
+        <div class="col-md-11">
+          <form action="." method="post" > {% csrf_token %}
+              <div class="form-group{% if form.user_select.errors %} has-error{% endif %}">
+                    <label for="{{ form.user_select.id_for_label }}">{{ form.user_select.label }}</label>
+                    {% render_field form.user_select class="form-control" onChange="form.submit();"%}
+                    {% for error in form.user_select.errors %}
+                      <p class="help-block">{{ error }}</p>
+                    {% endfor %}
+              </div>
+          </form>
+        </div> <!-- col-md-3 -->
+      </div> <!-- row user-select -->
     {% endif %}
 
     </div> <!-- col -->

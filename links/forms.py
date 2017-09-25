@@ -1,4 +1,6 @@
-from django.forms import (ModelForm, ValidationError, Textarea, CharField, Form, FileField, ChoiceField)
+from django.forms import (ModelForm, ValidationError, Textarea, CharField, Form, FileField, ChoiceField,
+	ModelChoiceField,)
+from django.contrib.auth.models import User
 
 from annoying.functions import get_object_or_None
 from snips.fields import EmptyChoiceField
@@ -44,3 +46,13 @@ class ImportFileForm(Form):
 
 class ExportFileForm(Form):
 	pass
+
+class UserInputForm(ModelForm):
+
+	user_select = ModelChoiceField(required=True,
+		queryset=User.objects.filter(is_active=True),
+		label = 'View another user\'s public links' )
+
+	class Meta:
+		model = User
+		fields = ['user_select',]

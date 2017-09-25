@@ -3,8 +3,9 @@ import time
 
 from django.shortcuts import render
 from django.views.generic import (FormView, TemplateView, ListView, CreateView,
-									DetailView, UpdateView, RedirectView, DeleteView)
+									DetailView, UpdateView, RedirectView, DeleteView, )
 from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import FormMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin,LoginRequiredMixin
 from django.http import (HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden, HttpResponseGone,
 						 HttpResponseBadRequest)
@@ -28,7 +29,7 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 
 from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from .models import Link, Profile, InterfaceFile
-from .forms import LinkForm, ImportFileForm, ExportFileForm
+from .forms import LinkForm, ImportFileForm, ExportFileForm, UserInputForm
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, )
@@ -81,17 +82,19 @@ class PublicLinkListView(ListView):
 
 	# 	context = super(PublicLinkListView,self).get_context_data(**kwargs)
 
-	# 	return context
+	# 	return contexthttps://docs.djangoproject.com/en/1.11/ref/templates/builtins/#if
 
 
-class UserLinkListView(LoginRequiredMixin,PublicLinkListView):
+class UserLinkListView(LoginRequiredMixin, FormMixin, PublicLinkListView):
+
+	form_class = UserInputForm
 
 	def get_queryset(self):
 		user = self.request.user
 		self.profile = get_profile(user)
 		self.queryset = Link.objects.filter(profile=self.profile)
 		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
-		                                   ## Yes, self is needed here
+										   ## Yes, self is needed here
 
 	def get_context_data(self, **kwargs):
 
@@ -100,6 +103,45 @@ class UserLinkListView(LoginRequiredMixin,PublicLinkListView):
 		context['latest_public'] = Link.objects.filter(public = True).order_by('-created_on')
 
 		context['display_name'] = self.profile.display_name
+
+		return context
+
+	def post(self, request, *args, **kwargs):
+		"""
+		Handles POST requests, instantiating a form instance with the passed
+		POST variables and then checked for validity.
+		"""
+		form = self.get_form()
+		self.form = form
+		if form.is_valid():
+			return self.form_valid(form)
+		else:
+			return self.form_invalid(form)
+
+	def put(self, *args, **kwargs):
+		return self.post(*args, **kwargs)
+
+	def get_success_url(self):
+		user = self.form.cleaned_data.get('user_select',None)
+		profile = get_profile(user)
+		print('PK:', profile.pk)
+		return reverse('otherlinks', kwargs={'pk': profile.pk})
+
+
+class OtherLinkListView(UserLinkListView):
+
+	def get_queryset(self):
+		user_pk = self.kwargs.get('pk',None)
+		self.profile = get_object_or_None(Profile,pk=user_pk)
+		self.queryset = Link.objects.filter(profile=self.profile,public=True)
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+										   ## Yes, self is needed here
+
+	def get_context_data(self, **kwargs):
+
+		context = super(OtherLinkListView,self).get_context_data(**kwargs)
+
+		context['other_list'] = True
 
 		return context
 
