@@ -49,6 +49,16 @@ def import_links_from_netscape(import_file_id):
 			date = datetime.fromtimestamp(int(secs), tz=timezone.utc)
 			bookmark['last_modified'] = date
 
+		# public
+
+		bookmark['public'] = True
+		pub = link.get('private')
+		if pub:
+			if pub == "0":
+				bookmark['public'] = True
+			else:
+				bookmark['public'] = False
+
 		# tags
 		tags = link.get('tags')
 		bookmark['tags'] = tags.split(',') if tags else []
@@ -62,6 +72,7 @@ def import_links_from_netscape(import_file_id):
 		current_link.url = bookmark['url']
 		current_link.title = bookmark['title']
 		current_link.created_on = bookmark['add_date']
+		current_link.public = bookmark['public']
 		current_link.comment = bookmark['comment']
 
 		try:
