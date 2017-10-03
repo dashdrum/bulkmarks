@@ -124,7 +124,6 @@ class UserLinkListView(LoginRequiredMixin, FormMixin, PublicLinkListView):
 	def get_success_url(self):
 		user = self.form.cleaned_data.get('user_select',None)
 		profile = get_profile(user)
-		print('PK:', profile.pk)
 		return reverse('otherlinks', kwargs={'pk': profile.pk})
 
 
@@ -159,7 +158,7 @@ class LinkDetailView(LoginRequiredMixin,DetailView):
 		if user == object.profile.user or object.public is True:
 			return object
 
-		return HttpResponseForbidden()
+		raise Http404()
 
 
 class LinkCreateView(LoginRequiredMixin,CreateView):
@@ -200,15 +199,26 @@ class LinkUpdateView(LoginRequiredMixin,UpdateView):
 		if user == obj.profile.user:
 			return obj
 
-		return HttpResponseForbidden()
+		raise Http404()
 
 
-class LinkDeleteView(PermissionRequiredMixin, SuccessURLRedirectListMixin, DeleteView):
+class LinkDeleteView(LoginRequiredMixin, SuccessURLRedirectListMixin, DeleteView):
 
 	permission_required = "links.delete_link"
 	raise_exception = True
 	model=Link
 	success_list_url = 'userlinks'
+
+	def get_object(self, queryset=None):
+
+		obj = super(LinkDeleteView,self).get_object(queryset)
+
+		user = self.request.user
+
+		if user == obj.profile.user:
+			return obj
+
+		raise Http404()
 
 class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 
@@ -290,7 +300,7 @@ class TestLinkView(LoginRequiredMixin,SingleObjectMixin, RedirectView):
 		user = self.request.user
 
 		if user != object.profile.user:
-			return HttpResponseForbidden()
+			raise Http404()
 
 		return object
 
@@ -334,15 +344,13 @@ class VisitLinkView(SingleObjectMixin, RedirectView):
 
 		user = self.request.user
 
-		print('User:', user)
-
 		if user == object.profile.user:
 			test_link(object.id)
 
 		if user == object.profile.user or object.public is True:
 			return object
 
-		return None
+		raise Http404()
 
 ###############################################################################
 #																			  #
@@ -360,7 +368,7 @@ class ProfileCheckMixin(object):
 		user = User.objects.get(username='dgentry') ## Temp user assignment
 
 		if user != obj.profile.user:
-			return HttpResponseForbidden()
+			raise Http404()
 
 		return obj
 
