@@ -29,7 +29,7 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 
 from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from .models import Link, Profile, InterfaceFile
-from .forms import LinkForm, ImportFileForm, ExportFileForm, UserInputForm
+from .forms import (LinkForm, ImportFileForm, ExportFileForm, UserInputForm, DeleteUserLinksInputForm, )
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, )
@@ -204,8 +204,6 @@ class LinkUpdateView(LoginRequiredMixin,UpdateView):
 
 class LinkDeleteView(LoginRequiredMixin, SuccessURLRedirectListMixin, DeleteView):
 
-	permission_required = "links.delete_link"
-	raise_exception = True
 	model=Link
 	success_list_url = 'userlinks'
 
@@ -351,6 +349,27 @@ class VisitLinkView(SingleObjectMixin, RedirectView):
 			return object
 
 		raise Http404()
+
+class DeleteUserLinksView(PermissionRequiredMixin,FormView):
+	form_class = DeleteUserLinksInputForm
+	template_name = "links/delete_user_links.html"
+	permission_required = "links.delete_link"
+	raise_exception = True
+
+	def form_valid(self, form):
+		self.user = form.cleaned_data.get('user_select',None)
+		self.profile = get_profile(self.user)
+
+		for l in Link.objects.filter(profile=self.profile):
+			l.delete()
+
+		return super(DeleteUserLinksView, self).form_valid(form)
+
+	def get_success_url(self):
+		return reverse('otherlinks', kwargs={'pk': self.profile.pk})
+
+
+
 
 ###############################################################################
 #																			  #

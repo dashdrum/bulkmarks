@@ -16,7 +16,8 @@ Including another URLconf
 from django.conf.urls import url
 from .views import (UserLinkListView, LinkDetailView, LinkCreateView, LinkUpdateView,
 					UploadImportFileTemplateView, TestLinkView, VisitLinkView,
-					ExportLinksView, LinkDeleteView, PublicLinkListView, OtherLinkListView,)
+					ExportLinksView, LinkDeleteView, PublicLinkListView, OtherLinkListView,
+					DeleteUserLinksView,)
 from .views import link_create
 from .views import (GetTitleAPIView, AddURLAPIView, TestLinkAPIView,)
 
@@ -32,6 +33,10 @@ urlpatterns = [
 	url(r'^linktest/(?P<pk>[0-9A-Fa-f-]+)/$',TestLinkView.as_view(),name='linktest'),
 	url(r'^import/$', UploadImportFileTemplateView.as_view(), name='import'),
 	url(r'^export/$', ExportLinksView.as_view(), name='export'),
+
+	## Admin links
+
+	url(r'^deleteuserlinks/$', DeleteUserLinksView.as_view(), name='deleteuserlinks'),
 
 	## Modal dialogs
 
