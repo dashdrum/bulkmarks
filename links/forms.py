@@ -56,3 +56,14 @@ class UserInputForm(ModelForm):
 	class Meta:
 		model = User
 		fields = ['user_select',]
+
+
+class DeleteUserLinksInputForm(ModelForm):
+
+	user_select = ModelChoiceField(required=True,
+		queryset=User.objects.filter(is_active=True),
+		label = 'Delete another user\'s links' )
+
+	class Meta:
+		model = User
+		fields = ['user_select',]
