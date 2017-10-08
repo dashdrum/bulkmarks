@@ -16,3 +16,4 @@ psycopg2
 urllib3
 whitenoise
 html5lib
+taggit
