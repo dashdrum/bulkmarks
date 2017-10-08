@@ -12,6 +12,11 @@ from .utils import get_title
 
 class LinkForm(ModelForm):
 
+	def __init__(self, *args, **kwargs):
+		super(LinkForm, self).__init__(*args, **kwargs)
+		##  Setting field attributes in __init__ avoids having to specify the field type, uses default
+		self.fields['tags'].required=False
+
 	title = CharField(required=False)
 	comment = CharField(required=False,widget=Textarea(attrs={'rows': '3'}))
 
@@ -37,7 +42,7 @@ class LinkForm(ModelForm):
 
 	class Meta:
 		model = Link
-		fields = ['title','url','comment','public',]
+		fields = ['title','url','comment','public','tags',]
 
 class ImportFileForm(Form):
 
@@ -47,23 +52,24 @@ class ImportFileForm(Form):
 class ExportFileForm(Form):
 	pass
 
-class UserInputForm(ModelForm):
+class ActiveUserInputForm(ModelForm):
 
 	user_select = ModelChoiceField(required=True,
-		queryset=User.objects.filter(is_active=True),
-		label = 'View another user\'s public links' )
+		queryset=User.objects.filter(is_active=True))
 
 	class Meta:
 		model = User
 		fields = ['user_select',]
 
+class OtherUserInputForm(ActiveUserInputForm):
 
-class DeleteUserLinksInputForm(ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(OtherUserInputForm, self).__init__(*args, **kwargs)
+		self.fields['user_select'].label='View another user\'s public links'
 
-	user_select = ModelChoiceField(required=True,
-		queryset=User.objects.filter(is_active=True),
-		label = 'Delete another user\'s links' )
 
-	class Meta:
-		model = User
-		fields = ['user_select',]
+class DeleteUserLinksInputForm(ActiveUserInputForm):
+
+	def __init__(self, *args, **kwargs):
+		super(DeleteUserLinksInputForm, self).__init__(*args, **kwargs)
+		self.fields['user_select'].label='Delete another user\'s links'

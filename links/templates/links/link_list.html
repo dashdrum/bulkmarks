@@ -15,123 +15,123 @@
 {% block content %}
 
 <div class="row" id="button-row">
-  <div class = "col-md-2">
-    <!-- BUTTON TO TRIGGER THE ACTION -->
-    <p>
-      <button type="button" class="btn btn-primary js-add-link">
-        <span class="glyphicon glyphicon-plus"></span>
-        New Link
-      </button>
-    </p>
-  </div> <!-- col -->
+	<div class = "col-md-2">
+		<!-- BUTTON TO TRIGGER THE ACTION -->
+		<p>
+			<button type="button" class="btn btn-primary js-add-link">
+				<span class="glyphicon glyphicon-plus"></span>
+				New Link
+			</button>
+		</p>
+	</div> <!-- col -->
 </div> <!-- button-row -->
 
 <div class="row">
-  <div class="col-md-7 col-md-offset-1" id="link-container">
+	<div class="col-md-7 col-md-offset-1" id="link-container">
 
-  {% if display_name %}
-    <h2>Links for {{ display_name }}</h2>
-  {% else %}
-    <h2>Public Links</h2>
-  {% endif %}
+		{% if display_name %}
+			<h2>Links for {{ display_name }}</h2>
+		{% else %}
+			<h2>Public Links</h2>
+		{% endif %}
 
-    <dl id="link-list">
-    {% for o in object_list %}
-    	<div class="link">
-    		<dt><a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
-    		{% if o.comment %}
-    			<dd>{{ o.comment|slice:":180"}}</dd>
-    		{% endif %}
-        {% if display_name and not other_list %}
-          (<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
-        {% endif %}
-    	</div>
-    {% endfor %}
-    </dl>
+		<dl id="link-list">
+			{% for o in object_list %}
+				<div class="link">
+					<dt><a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
+					{% if o.comment %}
+						<dd>{{ o.comment|slice:":180"}}</dd>
+					{% endif %}
+					{% if display_name and not other_list or user.is_superuser %}
+						(<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
+					{% endif %}
+				</div>
+			{% endfor %}
+		</dl>
 
-  <!-- PaginatorFive navigation buttons -->
-  {% if is_paginated %}
-        <ul class="pagination pagination-centered">
-            {% if page_obj.has_previous %}
-                <li><a href="?page=1">First</a></li>
-                {% if page_obj.has_previous_five %}
-                    <li><a href="?page={{ page_obj.previous_five_page_number }}">Back 5</a></li>
-                {% endif %}
-                <li><a href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
-            {% endif %}
+		<!-- PaginatorFive navigation buttons -->
+		{% if is_paginated %}
+			<ul class="pagination pagination-centered">
+					{% if page_obj.has_previous %}
+							<li><a href="?page=1">First</a></li>
+							{% if page_obj.has_previous_five %}
+									<li><a href="?page={{ page_obj.previous_five_page_number }}">Back 5</a></li>
+							{% endif %}
+							<li><a href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
+					{% endif %}
 
-            <li class="active" ><a href="?page={{page_obj.number}}">{{page_obj.number}} of {{ paginator.num_pages }}</a></li>
+					<li class="active" ><a href="?page={{page_obj.number}}">{{page_obj.number}} of {{ paginator.num_pages }}</a></li>
 
-            {% if page_obj.has_next %}
-                <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
-                {% if page_obj.has_next_five %}
-                    <li><a href="?page={{ page_obj.next_five_page_number }}">Ahead 5</a></li>
-                {% endif %}
-                <li><a href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
-            {% endif %}
-        </ul>
-    {% endif %}
+					{% if page_obj.has_next %}
+							<li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+							{% if page_obj.has_next_five %}
+									<li><a href="?page={{ page_obj.next_five_page_number }}">Ahead 5</a></li>
+							{% endif %}
+							<li><a href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
+					{% endif %}
+			</ul>
+		{% endif %}
 
-  </div> <!-- link-container -->
-    <div class="col-md-4">
-      <div class="row">
+	</div> <!-- link-container -->
 
-    {% if display_name %}
-      <div class = "link public-link"> <!-- show public links -->
-        <h3>Latest Public Links</h3>
-        <p><a href="{% url 'publiclinks' %}" title="View all public links">(view all)</a></p>
-        <dl id="latest-public">
-          {% for p in latest_public|slice:":7" %}
-            <dt><a href="{% url 'linkvisit' p.id %}" target="_blank">{{ p.title }}</a></dt>
-          {% endfor %}
-        </dl>
-      </div> <!-- public-link -->
-    {% endif %}
-    </div> <!-- row -->
+	<div class="col-md-4">
 
-    {% if not user.is_authenticated %}
-      <div class="row">  <!-- Signup for invite -->
-        <div class = "request-invite">
-          <p>Want to use Bulkmarks? <br>Request an invitation today.</p>
-          <a class="btn btn-primary" href="/m/signup" role="button">Request Invite</a>
-        </div>
-      </div> <!-- row -->
-    {% endif %}
+		{% if display_name %}
+			<div class="row">
+				<div class = "link public-link"> <!-- show public links -->
+					<h3>Latest Public Links</h3>
+					<p><a href="{% url 'publiclinks' %}" title="View all public links">(view all)</a></p>
+					<dl id="latest-public">
+						{% for p in latest_public|slice:":7" %}
+							<dt><a href="{% url 'linkvisit' p.id %}" target="_blank">{{ p.title }}</a></dt>
+						{% endfor %}
+					</dl>
+				</div> <!-- public-link -->
+			</div> <!-- row -->
+		{% endif %}
 
-    {% if user.is_authenticated %}
-      <div class="row user-select"> <!-- View another user's public links -->
-        <div class="col-md-11">
-          <form action="." method="post" > {% csrf_token %}
-              <div class="form-group{% if form.user_select.errors %} has-error{% endif %}">
-                    <label for="{{ form.user_select.id_for_label }}">{{ form.user_select.label }}</label>
-                    {% render_field form.user_select class="form-control" onChange="form.submit();"%}
-                    {% for error in form.user_select.errors %}
-                      <p class="help-block">{{ error }}</p>
-                    {% endfor %}
-              </div>
-          </form>
-        </div> <!-- col-md-3 -->
-      </div> <!-- row user-select -->
-    {% endif %}
+		{% if not user.is_authenticated %}
+			<div class="row">  <!-- Signup for invite -->
+				<div class = "request-invite">
+					<p>Want to use Bulkmarks? <br>Request an invitation today.</p>
+					<a class="btn btn-primary" href="/m/signup" role="button">Request Invite</a>
+				</div>
+			</div> <!-- row -->
+		{% endif %}
 
-    </div> <!-- col -->
+		{% if user.is_authenticated %}
+			<div class="row user-select"> <!-- View another user's public links -->
+				<div class="col-md-11">
+					<form action="." method="post" > {% csrf_token %}
+						<div class="form-group{% if form.user_select.errors %} has-error{% endif %}">
+							<label for="{{ form.user_select.id_for_label }}">{{ form.user_select.label }}</label>
+							{% render_field form.user_select class="form-control" onChange="form.submit();"%}
+							{% for error in form.user_select.errors %}
+								<p class="help-block">{{ error }}</p>
+							{% endfor %}
+						</div>
+					</form>
+				</div> <!-- col-md-3 -->
+			</div> <!-- row user-select -->
+		{% endif %}
 
+	</div> <!-- col -->
 </div> <!-- row -->
 
 
-  <!-- THE MODAL WE WILL BE USING -->
-  <div class="modal fade" id="modal-link">
-    <div class="modal-dialog">
-      <div class="modal-content">
-      </div>
-    </div>
-  </div>
+<!-- THE MODAL WE WILL BE USING -->
+<div class="modal fade" id="modal-link">
+	<div class="modal-dialog">
+		<div class="modal-content">
+		</div>
+	</div>
+</div>
 
 {% endblock content %}
 
 
 
 {% block end_scripts %}
-  {{ block.super }}
-  <script src="{% static 'links/js/link.js' %}"></script>
+	{{ block.super }}
+	<script src="{% static 'links/js/link.js' %}"></script>
 {% endblock end_scripts %}

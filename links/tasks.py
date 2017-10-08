@@ -60,8 +60,10 @@ def import_links_from_netscape(import_file_id):
 				bookmark['public'] = False
 
 		# tags
+		bookmark['tags'] = []
 		tags = link.get('tags')
-		bookmark['tags'] = tags.split(',') if tags else []
+		if tags:
+			bookmark['tags'] = tags.split(',')
 
 		# comment
 		sibling = link.parent.next_sibling
@@ -77,6 +79,8 @@ def import_links_from_netscape(import_file_id):
 
 		try:
 			current_link.save()
+			for t in  bookmark['tags']:
+				current_link.tags.add(t)
 		except IntegrityError: # duplicate entries
 			print( 'Integrity Error on: ', bookmark)
 		except DataError: # crazy data
@@ -126,7 +130,7 @@ def export_links_to_netscape(profile_id):
 		outtext += '" PRIVATE="'
 		outtext += str(int(not link.public)) #AWKWARD!
 		outtext += '" TAGS="'
-		outtext += ''
+		outtext += ', '.join('{0}'.format(t) for t in link.tags.names())
 		outtext += '">'
 		outtext += link.title
 		outtext += '</A>\n'

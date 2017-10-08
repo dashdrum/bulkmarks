@@ -29,7 +29,7 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 
 from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from .models import Link, Profile, InterfaceFile
-from .forms import (LinkForm, ImportFileForm, ExportFileForm, UserInputForm, DeleteUserLinksInputForm, )
+from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm, DeleteUserLinksInputForm, )
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, )
@@ -67,44 +67,18 @@ class PaginatorFive(Paginator):
 		"""
 		return PageFive(*args, **kwargs)
 
-class PublicLinkListView(ListView):
+class PublicLinkListView(FormMixin, ListView):
 	model = Link
 	ordering =  ['-created_on']
 	paginate_by = 10
 	paginator_class = PaginatorFive
 	template_name = 'links/link_list.html'
 
+	form_class = OtherUserInputForm
+
 	def get_queryset(self):
 		self.queryset = Link.objects.filter(public=True)
 		return super(PublicLinkListView,self).get_queryset()
-
-	# def get_context_data(self, **kwargs):
-
-	# 	context = super(PublicLinkListView,self).get_context_data(**kwargs)
-
-	# 	return contexthttps://docs.djangoproject.com/en/1.11/ref/templates/builtins/#if
-
-
-class UserLinkListView(LoginRequiredMixin, FormMixin, PublicLinkListView):
-
-	form_class = UserInputForm
-
-	def get_queryset(self):
-		user = self.request.user
-		self.profile = get_profile(user)
-		self.queryset = Link.objects.filter(profile=self.profile)
-		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
-										   ## Yes, self is needed here
-
-	def get_context_data(self, **kwargs):
-
-		context = super(UserLinkListView,self).get_context_data(**kwargs)
-
-		context['latest_public'] = Link.objects.filter(public = True).order_by('-created_on')
-
-		context['display_name'] = self.profile.display_name
-
-		return context
 
 	def post(self, request, *args, **kwargs):
 		"""
@@ -125,6 +99,31 @@ class UserLinkListView(LoginRequiredMixin, FormMixin, PublicLinkListView):
 		user = self.form.cleaned_data.get('user_select',None)
 		profile = get_profile(user)
 		return reverse('otherlinks', kwargs={'pk': profile.pk})
+
+	# def get_context_data(self, **kwargs):
+
+	# 	context = super(PublicLinkListView,self).get_context_data(**kwargs)
+
+	# 	return context
+
+class UserLinkListView(LoginRequiredMixin, PublicLinkListView):
+
+	def get_queryset(self):
+		user = self.request.user
+		self.profile = get_profile(user)
+		self.queryset = Link.objects.filter(profile=self.profile)
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+										   ## Yes, self is needed here
+
+	def get_context_data(self, **kwargs):
+
+		context = super(UserLinkListView,self).get_context_data(**kwargs)
+
+		context['latest_public'] = Link.objects.filter(public = True).order_by('-created_on')
+
+		context['display_name'] = self.profile.display_name
+
+		return context
 
 
 class OtherLinkListView(UserLinkListView):
@@ -176,6 +175,7 @@ class LinkCreateView(LoginRequiredMixin,CreateView):
 			self.object = form.save(commit=False)
 			self.object.profile = profile
 			self.object.save()
+			form.save_m2m()
 			return HttpResponseRedirect(self.get_success_url())
 		except IntegrityError as e:
 			# Add the error to the form and send it back
@@ -462,6 +462,7 @@ def link_create(request):
 			object = form.save(commit=False)
 			object.profile = profile
 			object.save()
+			form.save_m2m()
 			data['form_is_valid'] = True
 		else:
 			data['form_is_valid'] = False
