@@ -1,7 +1,7 @@
 from datetime import datetime
 import time
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import (FormView, TemplateView, ListView, CreateView,
 									DetailView, UpdateView, RedirectView, DeleteView, )
 from django.views.generic.detail import SingleObjectMixin
@@ -98,7 +98,7 @@ class PublicLinkListView(FormMixin, ListView):
 	def get_success_url(self):
 		user = self.form.cleaned_data.get('user_select',None)
 		profile = get_profile(user)
-		return reverse('otherlinks', kwargs={'pk': profile.pk})
+		return reverse('otherlinks', kwargs={'username': user.username})
 
 	# def get_context_data(self, **kwargs):
 
@@ -121,7 +121,9 @@ class UserLinkListView(LoginRequiredMixin, PublicLinkListView):
 
 		context['latest_public'] = Link.objects.filter(public = True).order_by('-created_on')
 
-		context['display_name'] = self.profile.display_name
+		if self.profile:
+			context['display_name'] = self.profile.display_name
+			context['username'] = self.profile.user.username
 
 		return context
 
@@ -129,20 +131,52 @@ class UserLinkListView(LoginRequiredMixin, PublicLinkListView):
 class OtherLinkListView(UserLinkListView):
 
 	def get_queryset(self):
-		user_pk = self.kwargs.get('pk',None)
-		self.profile = get_object_or_None(Profile,pk=user_pk)
+		user = get_object_or_404(User,username = self.kwargs.get('username',None))
+		self.profile = get_object_or_None(Profile,user=user)
 		self.queryset = Link.objects.filter(profile=self.profile,public=True)
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+										   ## Yes, self is needed here
+
+
+class AllTagLinkListView(UserLinkListView):
+
+	def get_queryset(self):
+		self.profile = None
+		tag = self.kwargs.get('tag',None)
+		print('Tag:',tag)
+		self.queryset = Link.objects.filter(tags__name__in=[tag],public=True)
 		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
 										   ## Yes, self is needed here
 
 	def get_context_data(self, **kwargs):
 
-		context = super(OtherLinkListView,self).get_context_data(**kwargs)
+		context = super(AllTagLinkListView,self).get_context_data(**kwargs)
 
-		context['other_list'] = True
+		context['tag'] = self.kwargs.get('tag',None)
 
 		return context
 
+
+class UserTagLinkListView(AllTagLinkListView):
+
+	def get_queryset(self):
+		tag = self.kwargs.get('tag',None)
+		user = self.request.user
+		self.profile = get_profile(user)
+		self.queryset = Link.objects.filter(tags__name__in=[tag],profile=self.profile)
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+										   ## Yes, self is needed here
+
+
+class OtherTagLinkListView(AllTagLinkListView):
+
+	def get_queryset(self):
+		tag = self.kwargs.get('tag',None)
+		user = get_object_or_404(User,username = self.kwargs.get('username',None))
+		self.profile = get_object_or_None(Profile,user=user)
+		self.queryset = Link.objects.filter(tags__name__in=[tag],profile=self.profile,public=True)
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+										   ## Yes, self is needed here
 
 
 class LinkDetailView(LoginRequiredMixin,DetailView):

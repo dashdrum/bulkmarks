@@ -17,14 +17,18 @@ from django.conf.urls import url
 from .views import (UserLinkListView, LinkDetailView, LinkCreateView, LinkUpdateView,
 					UploadImportFileTemplateView, TestLinkView, VisitLinkView,
 					ExportLinksView, LinkDeleteView, PublicLinkListView, OtherLinkListView,
-					DeleteUserLinksView,)
+					DeleteUserLinksView, AllTagLinkListView, UserTagLinkListView,
+					OtherTagLinkListView,)
 from .views import link_create
 from .views import (GetTitleAPIView, AddURLAPIView, TestLinkAPIView,)
 
 urlpatterns = [
 	url(r'^publiclinks/$', PublicLinkListView.as_view(), name='publiclinks'),
 	url(r'^userlinks/$', UserLinkListView.as_view(), name='userlinks'),
-	url(r'^otherlinks/(?P<pk>[0-9A-Fa-f-]+)/$', OtherLinkListView.as_view(), name='otherlinks'),
+	url(r'^otherlinks/(?P<username>.*)/$', OtherLinkListView.as_view(), name='otherlinks'),
+	url(r'^alltaglinks/(?P<tag>.*)/$', AllTagLinkListView.as_view(), name='alltaglinks'),
+	url(r'^usertaglinks/(?P<tag>.*)/$', UserTagLinkListView.as_view(), name='usertaglinks'),
+	url(r'^othertaglinks/(?P<username>.*)/(?P<tag>.*)/$', OtherTagLinkListView.as_view(), name='othertaglinks'),
 	url(r'^linkcreate/$', LinkCreateView.as_view(), name='linkcreate'),
 	url(r'^linkvisit/(?P<pk>[0-9A-Fa-f-]+)/$',VisitLinkView.as_view(),name='linkvisit'),
 	url(r'^linkdetail/(?P<pk>[0-9A-Fa-f-]+)/$',LinkDetailView.as_view(),name='linkdetail'),
