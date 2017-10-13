@@ -1,4 +1,6 @@
-from django.forms import (ModelForm, ValidationError, Textarea, CharField, Form, FileField, ChoiceField)
+from django.forms import (ModelForm, ValidationError, Textarea, CharField, Form, FileField, ChoiceField,
+	ModelChoiceField,)
+from django.contrib.auth.models import User
 
 from annoying.functions import get_object_or_None
 from snips.fields import EmptyChoiceField
@@ -9,6 +11,11 @@ from .utils import get_title
 
 
 class LinkForm(ModelForm):
+
+	def __init__(self, *args, **kwargs):
+		super(LinkForm, self).__init__(*args, **kwargs)
+		##  Setting field attributes in __init__ avoids having to specify the field type, uses default
+		self.fields['tags'].required=False
 
 	title = CharField(required=False)
 	comment = CharField(required=False,widget=Textarea(attrs={'rows': '3'}))
@@ -35,7 +42,7 @@ class LinkForm(ModelForm):
 
 	class Meta:
 		model = Link
-		fields = ['title','url','comment','public',]
+		fields = ['title','url','comment','public','tags',]
 
 class ImportFileForm(Form):
 
@@ -44,3 +51,25 @@ class ImportFileForm(Form):
 
 class ExportFileForm(Form):
 	pass
+
+class ActiveUserInputForm(ModelForm):
+
+	user_select = ModelChoiceField(required=True,
+		queryset=User.objects.filter(is_active=True))
+
+	class Meta:
+		model = User
+		fields = ['user_select',]
+
+class OtherUserInputForm(ActiveUserInputForm):
+
+	def __init__(self, *args, **kwargs):
+		super(OtherUserInputForm, self).__init__(*args, **kwargs)
+		self.fields['user_select'].label='View another user\'s public links'
+
+
+class DeleteUserLinksInputForm(ActiveUserInputForm):
+
+	def __init__(self, *args, **kwargs):
+		super(DeleteUserLinksInputForm, self).__init__(*args, **kwargs)
+		self.fields['user_select'].label='Delete another user\'s links'

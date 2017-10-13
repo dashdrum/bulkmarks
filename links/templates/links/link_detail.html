@@ -24,6 +24,8 @@
 		<p><label for="url">URL:</label> {{ object.url }}</p>
 		<p><label for="comment">Comments:</label> {{ object.comment }}</p>
 		<p><label for="public">Public Link:</label> {{ object.public }}</p>
+		<p><label for="tags">Tags:</label> {% for t in  object.tags.names %}
+			{{t}}{% if not forloop.last%}, {% endif %}{% endfor %}</p>
 
 		<p></p>
 		<p><label for="created_on">created_on:</label> {{ object.created_on }}</p>

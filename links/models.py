@@ -18,6 +18,19 @@ from .choices import LINK_STATUS_CHOICES, IMPORT_TYPE_CHOICES
 
 import uuid
 
+#-----------------------------------------------------------------------------#
+
+# Need to modify the through model to use a UUID as the object_id
+
+from taggit.managers import TaggableManager
+from taggit.managers import TaggableManager
+from taggit.models import CommonGenericTaggedItemBase, TaggedItemBase
+
+class GenericUUIDTaggedItem(CommonGenericTaggedItemBase, TaggedItemBase):
+    object_id = models.UUIDField(verbose_name='Object id', db_index=True)
+
+#-----------------------------------------------------------------------------#
+
 class Link(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	title = models.CharField(max_length=200,blank=True,null=False)
@@ -27,6 +40,8 @@ class Link(ModelBase):
 	status = models.CharField(max_length=1,blank=True,null=True,choices = LINK_STATUS_CHOICES)
 	profile = models.ForeignKey('Profile',null=False,blank=False)
 	tested_on = models.DateTimeField(blank=True,null=True)
+
+	tags = TaggableManager(through=GenericUUIDTaggedItem)
 
 	@property
 	def user(self):

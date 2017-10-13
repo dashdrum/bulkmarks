@@ -1,10 +1,11 @@
 from datetime import datetime
 import time
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import (FormView, TemplateView, ListView, CreateView,
-									DetailView, UpdateView, RedirectView, DeleteView)
+									DetailView, UpdateView, RedirectView, DeleteView, )
 from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import FormMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin,LoginRequiredMixin
 from django.http import (HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden, HttpResponseGone,
 						 HttpResponseBadRequest)
@@ -29,7 +30,7 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 
 from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from .models import Link, Profile, InterfaceFile
-from .forms import LinkForm, ImportFileForm, ExportFileForm
+from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm, DeleteUserLinksInputForm, )
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, )
@@ -67,29 +68,116 @@ class PaginatorFive(Paginator):
 		"""
 		return PageFive(*args, **kwargs)
 
-
-
-class UserLinkListView(LoginRequiredMixin,ListView):
+class PublicLinkListView(FormMixin, ListView):
 	model = Link
 	ordering =  ['-created_on']
 	paginate_by = 10
 	paginator_class = PaginatorFive
+	template_name = 'links/link_list.html'
+
+	form_class = OtherUserInputForm
+
+	def get_queryset(self):
+		self.queryset = Link.objects.filter(public=True)
+		return super(PublicLinkListView,self).get_queryset()
+
+	def post(self, request, *args, **kwargs):
+		"""
+		Handles POST requests, instantiating a form instance with the passed
+		POST variables and then checked for validity.
+		"""
+		form = self.get_form()
+		self.form = form
+		if form.is_valid():
+			return self.form_valid(form)
+		else:
+			return self.form_invalid(form)
+
+	def put(self, *args, **kwargs):
+		return self.post(*args, **kwargs)
+
+	def get_success_url(self):
+		user = self.form.cleaned_data.get('user_select',None)
+		profile = get_profile(user)
+		return reverse('otherlinks', kwargs={'username': user.username})
+
+	# def get_context_data(self, **kwargs):
+
+	# 	context = super(PublicLinkListView,self).get_context_data(**kwargs)
+
+	# 	return context
+
+class UserLinkListView(LoginRequiredMixin, PublicLinkListView):
 
 	def get_queryset(self):
 		user = self.request.user
 		self.profile = get_profile(user)
 		self.queryset = Link.objects.filter(profile=self.profile)
-		return super(UserLinkListView,self).get_queryset()
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+										   ## Yes, self is needed here
 
 	def get_context_data(self, **kwargs):
 
 		context = super(UserLinkListView,self).get_context_data(**kwargs)
 
-		context['display_name'] = self.profile.display_name
-
 		context['latest_public'] = Link.objects.filter(public = True).order_by('-created_on')
 
+		if self.profile:
+			context['display_name'] = self.profile.display_name
+			context['username'] = self.profile.user.username
+
 		return context
+
+
+class OtherLinkListView(UserLinkListView):
+
+	def get_queryset(self):
+		user = get_object_or_404(User,username = self.kwargs.get('username',None))
+		self.profile = get_object_or_None(Profile,user=user)
+		self.queryset = Link.objects.filter(profile=self.profile,public=True)
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+										   ## Yes, self is needed here
+
+
+class AllTagLinkListView(UserLinkListView):
+
+	def get_queryset(self):
+		self.profile = None
+		tag = self.kwargs.get('tag',None)
+		print('Tag:',tag)
+		self.queryset = Link.objects.filter(tags__name__in=[tag],public=True)
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+										   ## Yes, self is needed here
+
+	def get_context_data(self, **kwargs):
+
+		context = super(AllTagLinkListView,self).get_context_data(**kwargs)
+
+		context['tag'] = self.kwargs.get('tag',None)
+
+		return context
+
+
+class UserTagLinkListView(AllTagLinkListView):
+
+	def get_queryset(self):
+		tag = self.kwargs.get('tag',None)
+		user = self.request.user
+		self.profile = get_profile(user)
+		self.queryset = Link.objects.filter(tags__name__in=[tag],profile=self.profile)
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+										   ## Yes, self is needed here
+
+
+class OtherTagLinkListView(AllTagLinkListView):
+
+	def get_queryset(self):
+		tag = self.kwargs.get('tag',None)
+		user = get_object_or_404(User,username = self.kwargs.get('username',None))
+		self.profile = get_object_or_None(Profile,user=user)
+		self.queryset = Link.objects.filter(tags__name__in=[tag],profile=self.profile,public=True)
+		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
+										   ## Yes, self is needed here
 
 
 class LinkDetailView(LoginRequiredMixin,DetailView):
@@ -104,7 +192,7 @@ class LinkDetailView(LoginRequiredMixin,DetailView):
 		if user == object.profile.user or object.public is True:
 			return object
 
-		return HttpResponseForbidden()
+		raise Http404()
 
 
 class LinkCreateView(LoginRequiredMixin,CreateView):
@@ -122,6 +210,7 @@ class LinkCreateView(LoginRequiredMixin,CreateView):
 			self.object = form.save(commit=False)
 			self.object.profile = profile
 			self.object.save()
+			form.save_m2m()
 			return HttpResponseRedirect(self.get_success_url())
 		except IntegrityError as e:
 			# Add the error to the form and send it back
@@ -145,15 +234,24 @@ class LinkUpdateView(LoginRequiredMixin,UpdateView):
 		if user == obj.profile.user:
 			return obj
 
-		return HttpResponseForbidden()
+		raise Http404()
 
 
-class LinkDeleteView(PermissionRequiredMixin, SuccessURLRedirectListMixin, DeleteView):
+class LinkDeleteView(LoginRequiredMixin, SuccessURLRedirectListMixin, DeleteView):
 
-	permission_required = "links.delete_link"
-	raise_exception = True
 	model=Link
 	success_list_url = 'userlinks'
+
+	def get_object(self, queryset=None):
+
+		obj = super(LinkDeleteView,self).get_object(queryset)
+
+		user = self.request.user
+
+		if user == obj.profile.user:
+			return obj
+
+		raise Http404()
 
 class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 
@@ -235,7 +333,7 @@ class TestLinkView(LoginRequiredMixin,SingleObjectMixin, RedirectView):
 		user = self.request.user
 
 		if user != object.profile.user:
-			return HttpResponseForbidden()
+			raise Http404()
 
 		return object
 
@@ -265,7 +363,7 @@ class TestAllLinksView(LoginRequiredMixin, RedirectView):
 
 		return reverse('userlinks')
 
-class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
+class VisitLinkView(SingleObjectMixin, RedirectView):
 
 	model = Link
 
@@ -273,14 +371,15 @@ class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
 
 		self.object = self.get_object()
 
-		test_link(self.object.id)
+		if self.object:
+			url = self.get_redirect_url(*args, **kwargs)
 
-		url = self.get_redirect_url(*args, **kwargs)
-
-		if url:
-			return HttpResponseRedirect(url)
+			if url:
+				return HttpResponseRedirect(url)
+			else:
+				return HttpResponseGone()
 		else:
-			return HttpResponseGone()
+			return HttpResponseForbidden()
 
 	def get_redirect_url(self, *args, **kwargs):
 
@@ -292,10 +391,34 @@ class VisitLinkView(LoginRequiredMixin, SingleObjectMixin, RedirectView):
 
 		user = self.request.user
 
+		if user == object.profile.user:
+			test_link(object.id)
+
 		if user == object.profile.user or object.public is True:
 			return object
 
-		return HttpResponseForbidden()
+		raise Http404()
+
+class DeleteUserLinksView(PermissionRequiredMixin,FormView):
+	form_class = DeleteUserLinksInputForm
+	template_name = "links/delete_user_links.html"
+	permission_required = "links.delete_link"
+	raise_exception = True
+
+	def form_valid(self, form):
+		self.user = form.cleaned_data.get('user_select',None)
+		self.profile = get_profile(self.user)
+
+		for l in Link.objects.filter(profile=self.profile):
+			l.delete()
+
+		return super(DeleteUserLinksView, self).form_valid(form)
+
+	def get_success_url(self):
+		return reverse('otherlinks', kwargs={'username': self.profile.user.username})
+
+
+
 
 class SearchLinkListView(LoginRequiredMixin,ListView):
 	model = Link
@@ -344,7 +467,7 @@ class ProfileCheckMixin(object):
 		user = User.objects.get(username='dgentry') ## Temp user assignment
 
 		if user != obj.profile.user:
-			return HttpResponseForbidden()
+			raise Http404()
 
 		return obj
 
@@ -419,6 +542,7 @@ def link_create(request):
 			object = form.save(commit=False)
 			object.profile = profile
 			object.save()
+			form.save_m2m()
 			data['form_is_valid'] = True
 		else:
 			data['form_is_valid'] = False

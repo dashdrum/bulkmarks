@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'widget_tweaks',
+    'taggit',
 
     'links',
     'marketing',
@@ -154,6 +155,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [],
 
 }
+
+TAGGIT_CASE_INSENSITIVE = True
 
 
 #-----------------------------------------------------------------------------#

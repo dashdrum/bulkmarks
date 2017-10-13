@@ -12,8 +12,10 @@
 
 {% block nav_items %}
 {{ block.super }}
-<li><a href="{% url 'userlinks' %}">{{ user.get_username|upper }}'s Links</a></li>
-<li><a href="{% url 'linkcreate' %}">Add Link</a></li>
-<li><a href="{% url 'import' %}">Import</a></li>
-<li><a href="{% url 'export' %}">Export</a></li>
+{% if user.is_authenticated %}
+	<li><a href="{% url 'userlinks' %}">{{ user.get_username|upper }}'s Links</a></li>
+	<li><a href="{% url 'linkcreate' %}">Add Link</a></li>
+	<li><a href="{% url 'import' %}">Import</a></li>
+	<li><a href="{% url 'export' %}">Export</a></li>
+{% endif %}
 {% endblock nav_items %}

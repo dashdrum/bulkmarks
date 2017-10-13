@@ -16,3 +16,4 @@ urllib3
 whitenoise
 html5lib
 six
+django-taggit
