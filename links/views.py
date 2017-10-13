@@ -400,7 +400,7 @@ class DeleteUserLinksView(PermissionRequiredMixin,FormView):
 		return super(DeleteUserLinksView, self).form_valid(form)
 
 	def get_success_url(self):
-		return reverse('otherlinks', kwargs={'pk': self.profile.pk})
+		return reverse('otherlinks', kwargs={'username': self.profile.user.username})
 
 
 
