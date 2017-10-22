@@ -53,7 +53,7 @@
               {% if user.username == username %}
                 <a href="{% url 'usertaglinks' t %}" title="Tag search for {{ t }}">
               {% else %}
-                <a href="{% url 'othertaglinks' username t %}" title="Tag search for {{ t }}">
+                <a href="{% url 'othertaglinks' username t %}" title="Tag search {{username}} for {{ t }}">
               {% endif %}
             {% else %}
               <a href="{% url 'alltaglinks' t %}" title="Public tag search for {{ t }}">

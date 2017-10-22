@@ -433,11 +433,7 @@ class SearchLinkListView(LoginRequiredMixin,ListView):
 	def get_queryset(self):
 		user = self.request.user
 		self.profile = get_profile(user)
-		vector = SearchVector('title','comment','url')
-		query = SearchQuery('bouzouki')
-		qs = Link.objects.filter(profile=self.profile)
-		qs = qs.annotate(search=SearchVector('url','title','comment'),)
-		qs = qs.filter(search=SearchQuery('bouzouki') | SearchQuery('tuning') | SearchQuery('chicken'))
+		qs = Link.search_objects.search("bouzouki chicken tune").filter(profile=self.profile)
 		self.queryset = qs
 		return self.queryset
 
@@ -447,7 +443,7 @@ class SearchLinkListView(LoginRequiredMixin,ListView):
 
 		context['display_name'] = self.profile.display_name
 
-		context['search_term'] = 'bouzouki'
+		context['search_term'] = 'bouzouki chicken tune'
 
 		return context
 

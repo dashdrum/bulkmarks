@@ -1,4 +1,8 @@
+from functools import reduce
+import operator
+
 from django.db import models
+from django.db.models import Q
 from django.core.urlresolvers import reverse
 
 from snips.models import ModelBase
@@ -31,6 +35,21 @@ class GenericUUIDTaggedItem(CommonGenericTaggedItemBase, TaggedItemBase):
 
 #-----------------------------------------------------------------------------#
 
+class LinkSearchManager(models.Manager):
+    def search(self, search_terms):
+        terms = [term.strip() for term in search_terms.split()]
+        q_objects = []
+
+        for term in terms:
+            q_objects.append(Q(title__icontains=term))
+            q_objects.append(Q(comment__icontains=term))
+
+        # Start with a bare QuerySet
+        qs = self.get_queryset()
+
+        # Use operator's or_ to string together all of your Q objects.
+        return qs.filter(reduce(operator.or_, q_objects))
+
 class Link(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	title = models.CharField(max_length=200,blank=True,null=False)
@@ -42,6 +61,9 @@ class Link(ModelBase):
 	tested_on = models.DateTimeField(blank=True,null=True)
 
 	tags = TaggableManager(through=GenericUUIDTaggedItem)
+
+	objects = models.Manager()
+	search_objects = LinkSearchManager()
 
 	@property
 	def user(self):
