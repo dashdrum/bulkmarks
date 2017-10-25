@@ -1,5 +1,5 @@
 from django.forms import (ModelForm, ValidationError, Textarea, CharField, Form, FileField, ChoiceField,
-	ModelChoiceField,)
+	ModelChoiceField, HiddenInput)
 from django.contrib.auth.models import User
 
 from annoying.functions import get_object_or_None
@@ -73,3 +73,7 @@ class DeleteUserLinksInputForm(ActiveUserInputForm):
 	def __init__(self, *args, **kwargs):
 		super(DeleteUserLinksInputForm, self).__init__(*args, **kwargs)
 		self.fields['user_select'].label='Delete another user\'s links'
+
+class SearchInputForm(Form):
+	scope = CharField(max_length=60,widget=HiddenInput()) # Arbitrary length for now
+	searchparam = CharField(max_length=200,label='Search') # Arbitrary length for now

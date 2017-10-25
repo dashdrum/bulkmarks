@@ -30,7 +30,8 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 
 from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from .models import Link, Profile, InterfaceFile
-from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm, DeleteUserLinksInputForm, )
+from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm, DeleteUserLinksInputForm,
+                    SearchInputForm, )
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, )
@@ -76,6 +77,7 @@ class PublicLinkListView(FormMixin, ListView):
 	template_name = 'links/link_list.html'
 
 	form_class = OtherUserInputForm
+	search_form_class = SearchInputForm
 
 	def get_queryset(self):
 		self.queryset = Link.objects.filter(public=True)
@@ -101,11 +103,14 @@ class PublicLinkListView(FormMixin, ListView):
 		profile = get_profile(user)
 		return reverse('otherlinks', kwargs={'username': user.username})
 
-	# def get_context_data(self, **kwargs):
+	def get_context_data(self, **kwargs):
 
-	# 	context = super(PublicLinkListView,self).get_context_data(**kwargs)
+		context = super(PublicLinkListView,self).get_context_data(**kwargs)
+		context['scope'] = 'public'
+		context['searchform'] = self.search_form_class(initial= {'scope': 'public'})
+		#self.get_form(form_class=self.search_form_class)
 
-	# 	return context
+		return context
 
 class UserLinkListView(LoginRequiredMixin, PublicLinkListView):
 
@@ -119,7 +124,8 @@ class UserLinkListView(LoginRequiredMixin, PublicLinkListView):
 	def get_context_data(self, **kwargs):
 
 		context = super(UserLinkListView,self).get_context_data(**kwargs)
-
+		context['scope'] = 'user'
+		context['searchform'] = self.search_form_class(initial= {'scope': 'user'})
 		context['latest_public'] = Link.objects.filter(public = True).order_by('-created_on')
 
 		if self.profile:
@@ -137,6 +143,14 @@ class OtherLinkListView(UserLinkListView):
 		self.queryset = Link.objects.filter(profile=self.profile,public=True)
 		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
 										   ## Yes, self is needed here
+
+	def get_context_data(self, **kwargs):
+
+		context = super(PublicLinkListView,self).get_context_data(**kwargs)
+		context['scope'] = self.profile.user.username
+		context['searchform'] = self.search_form_class(initial= {'scope': self.profile.user.username})
+
+		return context
 
 
 class AllTagLinkListView(UserLinkListView):
@@ -420,20 +434,31 @@ class DeleteUserLinksView(PermissionRequiredMixin,FormView):
 
 
 
-class SearchLinkListView(LoginRequiredMixin,ListView):
+class SearchLinkListView(LoginRequiredMixin,FormMixin,ListView):
 	model = Link
+	ordering =  ['-created_on']
 	paginate_by = 10
 	paginator_class = PaginatorFive
 	template_name = 'links/search_list.html'
+	form_class = SearchInputForm
 
 	def get(self, request, *args, **kwargs):
-		#print('DATA:',self.request.GET['q'])
+		self.scope = kwargs.get('scope',None)
+		self.searchparam = kwargs.get('searchparam',None)
+
 		return super(SearchLinkListView, self).get(request, *args, **kwargs)
 
 	def get_queryset(self):
-		user = self.request.user
-		self.profile = get_profile(user)
-		qs = Link.search_objects.search("bouzouki chicken tune").filter(profile=self.profile)
+		qs = Link.search_objects.search(self.searchparam)
+		if self.scope == 'user':
+			user = self.request.user
+			self.profile = get_profile(user)
+			qs = qs.filter(profile=self.profile)
+		elif self.scope == 'public':
+			qs = qs.filter(public=True)
+		else:
+			self.profile = get_object_or_None(Profile,user__username=self.scope)
+			qs = qs.filter(profile=self.profile, public = True)
 		self.queryset = qs
 		return self.queryset
 
@@ -441,11 +466,32 @@ class SearchLinkListView(LoginRequiredMixin,ListView):
 
 		context = super(SearchLinkListView,self).get_context_data(**kwargs)
 
-		context['display_name'] = self.profile.display_name
+		if self.scope != 'public':
+			context['display_name'] = self.profile.display_name
 
-		context['search_term'] = 'bouzouki chicken tune'
+		context['search_term'] = self.searchparam
 
 		return context
+
+	def post(self, request, *args, **kwargs):
+		"""
+		Handles POST requests, instantiating a form instance with the passed
+		POST variables and then checked for validity.
+		"""
+		form = self.get_form()
+		self.form = form
+		if form.is_valid():
+			return self.form_valid(form)
+		else:
+			return self.form_invalid(form)
+
+	def put(self, *args, **kwargs):
+		return self.post(*args, **kwargs)
+
+	def get_success_url(self):
+		scope = self.request.POST.get('scope',None)
+		searchparam = self.request.POST.get('searchparam',None)
+		return reverse('search', kwargs={'scope': scope, 'searchparam': searchparam})
 
 ###############################################################################
 #																			  #

@@ -39,7 +39,8 @@ urlpatterns = [
 	url(r'^linktestall/$', TestAllLinksView.as_view(), name='linktestall'),
 	url(r'^import/$', UploadImportFileTemplateView.as_view(), name='import'),
 	url(r'^export/$', ExportLinksView.as_view(), name='export'),
-	url(r'^search/$', SearchLinkListView.as_view(), name='search'),
+	url(r'^search/$', SearchLinkListView.as_view(), name='searchentry'),
+	url(r'^search/(?P<scope>.*)/(?P<searchparam>.*)/$', SearchLinkListView.as_view(), name='search'),
 
 	## Admin links
 

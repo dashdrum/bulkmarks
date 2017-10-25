@@ -40,6 +40,8 @@
     {% endif %}
     </h2>
 
+    {{ scope }}
+
     <dl id="link-list">
       {% for o in object_list %}
         <div class="link">
@@ -95,6 +97,20 @@
   </div> <!-- link-container -->
 
   <div class="col-md-4">
+
+    <div id="search_panel">
+      <form id="search_form" action="{% url 'searchentry' %}" method="post">
+         {% csrf_token %}
+            <div class="form-group{% if searchform.user_select.errors %} has-error{% endif %}">
+              {% render_field searchform.scope class="form-control" %}
+              <label for="{{ searchform.searchparam.id_for_label }}">{{ searchform.searchparam.label }}</label>
+              {% render_field searchform.searchparam class="form-control" %}
+              {% for error in searchform.user_select.errors %}
+                <p class="help-block">{{ error }}</p>
+              {% endfor %}
+            </div>
+        <button type="submit" class="btn btn-primary" >Search</button>
+      </form>
 
     {% if display_name %}
       <div class="row">
