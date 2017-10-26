@@ -14,19 +14,18 @@ Including another URLconf
 	2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
-from .views import (UserLinkListView, LinkDetailView, LinkCreateView, LinkUpdateView,
+from .views import (LinkListView, LinkDetailView, LinkCreateView, LinkUpdateView,
 					UploadImportFileTemplateView, TestLinkView, VisitLinkView,
 					ExportLinksView, LinkDeleteView, SearchLinkListView,
-					TestAllLinksView, PublicLinkListView, OtherLinkListView,
+					TestAllLinksView,
 					DeleteUserLinksView, AllTagLinkListView, UserTagLinkListView,
 					OtherTagLinkListView,)
 from .views import link_create
 from .views import (GetTitleAPIView, AddURLAPIView, TestLinkAPIView,)
 
 urlpatterns = [
-	url(r'^publiclinks/$', PublicLinkListView.as_view(), name='publiclinks'),
-	url(r'^userlinks/$', UserLinkListView.as_view(), name='userlinks'),
-	url(r'^otherlinks/(?P<username>.*)/$', OtherLinkListView.as_view(), name='otherlinks'),
+	url(r'^links/$', LinkListView.as_view(), name='linksentry'),
+	url(r'^links/(?P<scope>.*)/$', LinkListView.as_view(), name='links'),
 	url(r'^alltaglinks/(?P<tag>.*)/$', AllTagLinkListView.as_view(), name='alltaglinks'),
 	url(r'^usertaglinks/(?P<tag>.*)/$', UserTagLinkListView.as_view(), name='usertaglinks'),
 	url(r'^othertaglinks/(?P<username>.*)/(?P<tag>.*)/$', OtherTagLinkListView.as_view(), name='othertaglinks'),

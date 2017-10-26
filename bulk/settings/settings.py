@@ -31,7 +31,7 @@ else:
     ALLOWED_HOSTS = ['*']
 
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/l/userlinks/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 AUTHENTICATION_BACKENDS = ('bulk.backends.CaseInsensitiveModelBackend', )
