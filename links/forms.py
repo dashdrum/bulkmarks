@@ -77,3 +77,8 @@ class DeleteUserLinksInputForm(ActiveUserInputForm):
 class SearchInputForm(Form):
 	scope = CharField(max_length=60,widget=HiddenInput()) # Arbitrary length for now
 	searchparam = CharField(max_length=200,label='Search') # Arbitrary length for now
+
+class TagInputForm(Form):
+	scope = CharField(max_length=60,widget=HiddenInput()) # Arbitrary length for now
+	searchtag = CharField(max_length=100,label='Tag Search') # Arbitrary length for now
+

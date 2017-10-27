@@ -49,15 +49,7 @@
           {% endif %}
           {% for t in  o.tags.names %}
             {% if forloop.first %}<dd>Tags: {% endif %}
-            {% if display_name %}
-              {% if user.username == username %}
-                <a href="{% url 'usertaglinks' t %}" title="Tag search for {{ t }}">
-              {% else %}
-                <a href="{% url 'othertaglinks' username t %}" title="Tag search {{username}} for {{ t }}">
-              {% endif %}
-            {% else %}
-              <a href="{% url 'alltaglinks' t %}" title="Public tag search for {{ t }}">
-            {% endif %}
+              <a href="{% url 'taglinks' scope t %}" title="Tag search for {{ t }}">
             {{ t }}</a>
             {% if not forloop.last%}, {% endif %}
             {% if forloop.last%}</dd>{% endif %}
@@ -108,6 +100,20 @@
               {% endfor %}
             </div>
         <button type="submit" class="btn btn-primary" >Search</button>
+      </form>
+
+    <div id="tag_panel">
+      <form id="tag_form" action="{% url 'tagentry' %}" method="post">
+         {% csrf_token %}
+            <div class="form-group{% if tagform.user_select.errors %} has-error{% endif %}">
+              {% render_field tagform.scope class="form-control" %}
+              <label for="{{ tagform.searchtag.id_for_label }}">{{ tagform.searchtag.label }}</label>
+              {% render_field tagform.searchtag class="form-control" %}
+              {% for error in tagform.user_select.errors %}
+                <p class="help-block">{{ error }}</p>
+              {% endfor %}
+            </div>
+        <button type="submit" class="btn btn-primary" >Tag Search</button>
       </form>
 
     {% if display_name %}

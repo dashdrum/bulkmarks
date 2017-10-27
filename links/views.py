@@ -31,7 +31,7 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from .models import Link, Profile, InterfaceFile
 from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm, DeleteUserLinksInputForm,
-                    SearchInputForm, )
+                    SearchInputForm, TagInputForm, )
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, )
@@ -78,6 +78,7 @@ class LinkListView(FormMixin, ListView):
 
 	form_class = OtherUserInputForm
 	search_form_class = SearchInputForm
+	tag_form_class = TagInputForm
 
 	def get(self, request, *args, **kwargs):
 
@@ -112,6 +113,7 @@ class LinkListView(FormMixin, ListView):
 		context['latest_public'] = Link.objects.filter(public = True).order_by('-created_on')
 		context['scope'] = self.scope
 		context['searchform'] = self.search_form_class(initial= {'scope': self.scope})
+		context['tagform'] = self.tag_form_class(initial= {'scope': self.scope})
 
 		if self.profile:
 			context['display_name'] = self.profile.display_name
@@ -141,48 +143,36 @@ class LinkListView(FormMixin, ListView):
 
 	def get_success_url(self):
 		user = self.form.cleaned_data.get('user_select',None)
-		profile = get_profile(user)
 		return reverse('links', kwargs={'scope': user.username})
 
-class AllTagLinkListView(LinkListView):
+class TagLinkListView(LinkListView):
+
+	form_class = TagInputForm
 
 	def get_queryset(self):
 		self.profile = None
+		qs = super(TagLinkListView,self).get_queryset()
 		tag = self.kwargs.get('tag',None)
-		print('Tag:',tag)
-		self.queryset = Link.objects.filter(tags__name__in=[tag],public=True)
-		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
-										   ## Yes, self is needed here
+		self.queryset = qs.filter(tags__name__in=[tag],public=True)
+		return self.queryset
 
 	def get_context_data(self, **kwargs):
 
-		context = super(AllTagLinkListView,self).get_context_data(**kwargs)
+		context = super(TagLinkListView,self).get_context_data(**kwargs)
 
 		context['tag'] = self.kwargs.get('tag',None)
 
 		return context
 
+	#=============================================================================#
+	#
+	#     Handle tag search
+	#
 
-class UserTagLinkListView(AllTagLinkListView):
-
-	def get_queryset(self):
-		tag = self.kwargs.get('tag',None)
-		user = self.request.user
-		self.profile = get_profile(user)
-		self.queryset = Link.objects.filter(tags__name__in=[tag],profile=self.profile)
-		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
-										   ## Yes, self is needed here
-
-
-class OtherTagLinkListView(AllTagLinkListView):
-
-	def get_queryset(self):
-		tag = self.kwargs.get('tag',None)
-		user = get_object_or_404(User,username = self.kwargs.get('username',None))
-		self.profile = get_object_or_None(Profile,user=user)
-		self.queryset = Link.objects.filter(tags__name__in=[tag],profile=self.profile,public=True)
-		return ListView.get_queryset(self) ## Using the logic from the ListView class, not the direct ancestor
-										   ## Yes, self is needed here
+	def get_success_url(self):
+		scope = self.form.cleaned_data.get('scope',None)
+		searchtag = self.form.cleaned_data.get('searchtag',None)
+		return reverse('taglinks', kwargs={'scope': scope, 'tag': searchtag})
 
 
 class LinkDetailView(LoginRequiredMixin,DetailView):
