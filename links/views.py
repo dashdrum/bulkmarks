@@ -79,6 +79,7 @@ class LinkListView(FormMixin, ListView):
 	form_class = OtherUserInputForm
 	search_form_class = SearchInputForm
 	tag_form_class = TagInputForm
+	user_form_class = OtherUserInputForm
 
 	def get(self, request, *args, **kwargs):
 
@@ -92,9 +93,7 @@ class LinkListView(FormMixin, ListView):
 
 		return super(LinkListView, self).get(request, *args, **kwargs)
 
-	def get_queryset(self):
-		self.profile = None
-		qs = Link.objects
+	def add_scope(self,qs):
 		if self.scope == 'user':
 			user = self.request.user
 			self.profile = get_profile(user)
@@ -104,6 +103,11 @@ class LinkListView(FormMixin, ListView):
 		else:
 			self.profile = get_object_or_None(Profile,user__username=self.scope)
 			qs = qs.filter(profile=self.profile, public = True)
+		return qs
+
+	def get_queryset(self):
+		self.profile = None
+		qs = self.add_scope(Link.objects)
 		self.queryset = qs
 		return super(LinkListView,self).get_queryset()
 
@@ -114,6 +118,7 @@ class LinkListView(FormMixin, ListView):
 		context['scope'] = self.scope
 		context['searchform'] = self.search_form_class(initial= {'scope': self.scope})
 		context['tagform'] = self.tag_form_class(initial= {'scope': self.scope})
+		context['userform'] = self.user_form_class()
 
 		if self.profile:
 			context['display_name'] = self.profile.display_name
@@ -145,12 +150,11 @@ class LinkListView(FormMixin, ListView):
 		user = self.form.cleaned_data.get('user_select',None)
 		return reverse('links', kwargs={'scope': user.username})
 
-class TagLinkListView(LinkListView):
+class TagLinkListView(LoginRequiredMixin,LinkListView):
 
 	form_class = TagInputForm
 
 	def get_queryset(self):
-		self.profile = None
 		qs = super(TagLinkListView,self).get_queryset()
 		tag = self.kwargs.get('tag',None)
 		self.queryset = qs.filter(tags__name__in=[tag],public=True)
@@ -415,12 +419,7 @@ class DeleteUserLinksView(PermissionRequiredMixin,FormView):
 
 
 
-class SearchLinkListView(LoginRequiredMixin,FormMixin,ListView):
-	model = Link
-	ordering =  ['-created_on']
-	paginate_by = 10
-	paginator_class = PaginatorFive
-	template_name = 'links/search_list.html'
+class SearchLinkListView(LoginRequiredMixin,LinkListView):
 	form_class = SearchInputForm
 
 	def get(self, request, *args, **kwargs):
@@ -430,48 +429,26 @@ class SearchLinkListView(LoginRequiredMixin,FormMixin,ListView):
 		return super(SearchLinkListView, self).get(request, *args, **kwargs)
 
 	def get_queryset(self):
-		qs = Link.search_objects.search(self.searchparam)
-		if self.scope == 'user':
-			user = self.request.user
-			self.profile = get_profile(user)
-			qs = qs.filter(profile=self.profile)
-		elif self.scope == 'public':
-			qs = qs.filter(public=True)
-		else:
-			self.profile = get_object_or_None(Profile,user__username=self.scope)
-			qs = qs.filter(profile=self.profile, public = True)
+		qs = self.add_scope(Link.search_objects.search(self.searchparam))
 		self.queryset = qs
-		return self.queryset
+		return super(LinkListView,self).get_queryset() # Super of LinkListView, not current class
 
 	def get_context_data(self, **kwargs):
 
 		context = super(SearchLinkListView,self).get_context_data(**kwargs)
 
-		if self.scope != 'public':
-			context['display_name'] = self.profile.display_name
-
 		context['search_term'] = self.searchparam
 
 		return context
 
-	def post(self, request, *args, **kwargs):
-		"""
-		Handles POST requests, instantiating a form instance with the passed
-		POST variables and then checked for validity.
-		"""
-		form = self.get_form()
-		self.form = form
-		if form.is_valid():
-			return self.form_valid(form)
-		else:
-			return self.form_invalid(form)
-
-	def put(self, *args, **kwargs):
-		return self.post(*args, **kwargs)
+	#=============================================================================#
+	#
+	#     Handle search input
+	#
 
 	def get_success_url(self):
-		scope = self.request.POST.get('scope',None)
-		searchparam = self.request.POST.get('searchparam',None)
+		scope = self.form.cleaned_data.get('scope',None)
+		searchparam = self.form.cleaned_data.get('searchparam',None)
 		return reverse('search', kwargs={'scope': scope, 'searchparam': searchparam})
 
 ###############################################################################
