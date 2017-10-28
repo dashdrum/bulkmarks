@@ -9,7 +9,7 @@ django-widget-tweaks
 django>=1.11
 djangorestframework
 git+http://github.com/dashdrum/dashdrum-django-snips.git#egg=dashdrum-django-snips
-git+http://github.com/dashdrum/django-heartbeat.git#egg=django-heartbeat
+-e git+http://github.com/dashdrum/django-heartbeat.git#egg=django-heartbeat
 gunicorn
 psycopg2
 urllib3
