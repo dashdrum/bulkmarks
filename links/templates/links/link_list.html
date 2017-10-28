@@ -30,14 +30,20 @@
   <div class="col-md-7 col-md-offset-1" id="link-container">
 
     <h2>
-    {% if display_name %}
-      Links for {{ display_name|upper }}
-    {% else %}
-      Public Links
-    {% endif %}
-    {% if tag %}
-       tagged with {{ tag }}
-    {% endif %}
+      {% if search_term %}
+        Search
+      {% endif %}
+      {% if display_name %}
+        {{ display_name|upper }}'s Links
+      {% else %}
+        Public Links
+      {% endif %}
+      {% if tag %}
+         tagged with <em>{{ tag }}</em>
+      {% endif %}
+      {% if search_term %}
+        for <em>{{ search_term }}</em>
+      {% endif %}
     </h2>
 
     <dl id="link-list">
