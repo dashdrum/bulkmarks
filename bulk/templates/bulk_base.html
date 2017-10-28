@@ -22,7 +22,9 @@
 {% block contentheader %}
 {{block.super}}
 
-<span id="page_title">BULKMARKS</span>
+<a href="{% url 'index' %}" alt="Bulkmarks logo" title="BULKmarks Home">
+	<span id="page_title">BULKmarks</span>
+</a>
 {% endblock contentheader %}
 
 {% block extra_head %}
