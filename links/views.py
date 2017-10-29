@@ -31,7 +31,7 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from .models import Link, Profile, InterfaceFile
 from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm, DeleteUserLinksInputForm,
-                    SearchInputForm, TagInputForm, )
+					SearchInputForm, TagInputForm, )
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, )
@@ -198,8 +198,30 @@ class LinkCreateView(LoginRequiredMixin,CreateView):
 	model = Link
 	form_class = LinkForm
 
+	def tags_as_string(self,tags):
+		""" Return tag names in a comma-delimited string """
+		names = []
+		for name in tags.names():
+			if ',' in name or ' ' in name:
+				names.append('"%s"' % name)
+			else:
+				names.append(name)
+		return ', '.join(sorted(names))
+
+	def get_initial(self):
+		pk = self.kwargs.get('pk',None)
+		if pk:
+			add_link = get_object_or_404(Link,pk=pk)
+			self.initial['id'] = add_link.id
+			self.initial['title'] = add_link.title
+			self.initial['url'] = add_link.url
+			self.initial['comment'] = add_link.comment
+			self.initial['tags'] = self.tags_as_string(add_link.tags)
+
+		return super(LinkCreateView,self).get_initial()
+
 	def get_success_url(self):
-		return reverse('userlinks')
+		return reverse('linksentry')
 
 	def form_valid(self, form):
 		user = self.request.user
@@ -239,7 +261,7 @@ class LinkUpdateView(LoginRequiredMixin,UpdateView):
 class LinkDeleteView(LoginRequiredMixin, SuccessURLRedirectListMixin, DeleteView):
 
 	model=Link
-	success_list_url = 'userlinks'
+	success_list_url = 'linksentry'
 
 	def get_object(self, queryset=None):
 
@@ -258,7 +280,7 @@ class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 	template_name = 'links/import.html'
 
 	def get_success_url(self):
-		return reverse('userlinks')
+		return reverse('linksentry')
 
 	def form_valid(self,form):
 

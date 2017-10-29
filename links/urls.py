@@ -27,6 +27,7 @@ urlpatterns = [
 	url(r'^taglinks/(?P<scope>.*)/(?P<tag>.*)/$', TagLinkListView.as_view(), name='taglinks'),
 	url(r'^taglinks/$', TagLinkListView.as_view(), name='tagentry'),
 	url(r'^linkcreate/$', LinkCreateView.as_view(), name='linkcreate'),
+	url(r'^linkcreate/(?P<pk>[0-9A-Fa-f-]+)/$', LinkCreateView.as_view(), name='linkcopy'),
 	url(r'^linkvisit/(?P<pk>[0-9A-Fa-f-]+)/$',VisitLinkView.as_view(),name='linkvisit'),
 	url(r'^linkdetail/(?P<pk>[0-9A-Fa-f-]+)/$',LinkDetailView.as_view(),name='linkdetail'),
 	url(r'^linkupdate/(?P<pk>[0-9A-Fa-f-]+)/$',LinkUpdateView.as_view(),name='linkupdate'),
