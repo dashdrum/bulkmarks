@@ -51,8 +51,8 @@
           {% if user == o.profile.user or user.is_superuser %}
             (<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
           {% endif %}
-          {% if user != o.profile.user %}
-            (<a href="{% url 'linkcopy' o.id %}">Copy</a>)
+          {% if user != o.profile.user and user.is_authenticated %}
+            (<a href="{% url 'linkcopy' o.id %}" title="Copy to my link list">Copy</a>)
           {% endif %}
         </div> <!-- Link -->
       {% endfor %}

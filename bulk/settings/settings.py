@@ -36,6 +36,9 @@ LOGOUT_REDIRECT_URL = '/'
 
 AUTHENTICATION_BACKENDS = ('bulk.backends.CaseInsensitiveModelBackend', )
 
+SESSION_COOKIE_AGE = 86400 # 24 hours
+SESSION_SAVE_EVERY_REQUEST = True
+
 # Application definition
 
 INSTALLED_APPS = [
