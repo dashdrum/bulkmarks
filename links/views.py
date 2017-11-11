@@ -35,6 +35,7 @@ from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, )
+from .messages import messages
 
 class PageFive(Page):
 
@@ -86,10 +87,14 @@ class LinkListView(FormMixin, ListView):
 		self.scope = kwargs.get('scope',None)
 
 		if not request.user.is_authenticated and self.scope != 'public':
-			return HttpResponseRedirect(reverse('links', kwargs={'scope': 'public'}))
+			# return HttpResponseRedirect(reverse('links', kwargs={'scope': 'public'}))
+			self.scope = 'public'
 
 		if self.scope == None:
-			return HttpResponseRedirect(reverse('links', kwargs={'scope': 'user'}))
+			# return HttpResponseRedirect(reverse('links', kwargs={'scope': 'user'}))
+			self.scope = 'user'
+
+		self.mid = self.request.GET.get('mid',None)
 
 		return super(LinkListView, self).get(request, *args, **kwargs)
 
@@ -123,6 +128,13 @@ class LinkListView(FormMixin, ListView):
 		if self.profile:
 			context['display_name'] = self.profile.display_name
 			context['username'] = self.profile.user.username
+
+		if self.mid:
+			try:
+				context['message'] = messages[self.mid]
+			except KeyError:
+				pass   # ignore an unknown key
+
 
 		return context
 
@@ -280,7 +292,7 @@ class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 	template_name = 'links/import.html'
 
 	def get_success_url(self):
-		return reverse('linksentry')
+		return reverse('linksentry') + '?mid=IMPORTSTART'
 
 	def form_valid(self,form):
 
@@ -302,8 +314,9 @@ class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 		instance.refresh_from_db()
 
 		if instance.file_format == 'D' or instance.file_format == 'N': # Netscape Bookmark File (Used by Delicious)
-			import_links_from_netscape(instance.id)
+			import_links_from_netscape.delay(instance.id)
 		else:
+			# Form should catch this error.  How to report?
 			instance.status = 'E' # Unknown file format
 			instance.save()
 
@@ -376,7 +389,7 @@ class TestAllLinksView(LoginRequiredMixin, RedirectView):
 
 		profile = get_profile(self.request.user)
 
-		test_all_links(profile.id)
+		test_all_links.delay(profile.id)
 
 		return super(TestAllLinksView, self).get(request, *args, **kwargs)
 
@@ -436,7 +449,7 @@ class DeleteUserLinksView(PermissionRequiredMixin,FormView):
 		return super(DeleteUserLinksView, self).form_valid(form)
 
 	def get_success_url(self):
-		return reverse('otherlinks', kwargs={'username': self.profile.user.username})
+		return reverse('links', kwargs={'scope': self.profile.user.username})
 
 
 

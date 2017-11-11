@@ -6,92 +6,142 @@ from django.utils.timezone import make_aware, utc
 from annoying.functions import get_object_or_None
 from bs4 import BeautifulSoup
 from django.db import IntegrityError, DataError
+from django.core.mail import send_mail
+
+from bulk.celery import app
+
 
 from .models import InterfaceFile, Link, Profile
 from .utils import test_link
 
 
+
 #-----------------------------------------------------------------------------#
 
+@app.task()
 def import_links_from_netscape(import_file_id):
 
+	import_obj = None
+
 	import_status = None
+	error_count = 0
+	dupe_count = 0
+	success_count = 0
+	file_error = False
 
 	try:
 		import_obj = get_object_or_None(InterfaceFile, id = import_file_id)
 		print('Import file:', import_obj)
 		profile = import_obj.profile
 	except:
-		print('get error')
+		print('get import file error')
+		file_error = True
 		raise
 
-	soup = BeautifulSoup(import_obj.text, "html5lib")
+	if import_obj:
 
-	for link in soup.find_all('a'):
-		bookmark = {}
+		soup = BeautifulSoup(import_obj.text, "html5lib")
 
-		# url and title
-		bookmark['url'] = link.get('href')
+		for link in soup.find_all('a'):
+			bookmark = {}
 
-		if bookmark['url'][:bookmark['url'].index(':')] in ('javascript','place','file'):
-			print('Skipping ', bookmark['url'][:bookmark['url'].index(':')])
-			continue
+			# url and title
+			bookmark['url'] = link.get('href')
 
-		bookmark['title'] = link.string.strip()[:200] if link.string else bookmark['url']
+			if bookmark['url'][:bookmark['url'].index(':')] in ('javascript','place','file'):
+				print('Skipping ', bookmark['url'][:bookmark['url'].index(':')])
+				continue
 
-		# add date
-		secs = link.get('add_date')
-		date = datetime.fromtimestamp(int(secs), tz=timezone.utc)
-		bookmark['add_date'] = date
+			bookmark['title'] = link.string.strip()[:200] if link.string else bookmark['url']
 
-		# last modified
-		secs = link.get('last_modified')
-		if secs:
+			# add date
+			secs = link.get('add_date')
 			date = datetime.fromtimestamp(int(secs), tz=timezone.utc)
-			bookmark['last_modified'] = date
+			bookmark['add_date'] = date
 
-		# public
+			# last modified
+			secs = link.get('last_modified')
+			if secs:
+				date = datetime.fromtimestamp(int(secs), tz=timezone.utc)
+				bookmark['last_modified'] = date
 
-		bookmark['public'] = True
-		pub = link.get('private')
-		if pub:
-			if pub == "0":
-				bookmark['public'] = True
-			else:
-				bookmark['public'] = False
+			# public
 
-		# tags
-		bookmark['tags'] = []
-		tags = link.get('tags')
-		if tags:
-			bookmark['tags'] = tags.split(',')
+			bookmark['public'] = True
+			pub = link.get('private')
+			if pub:
+				if pub == "0":
+					bookmark['public'] = True
+				else:
+					bookmark['public'] = False
 
-		# comment
-		sibling = link.parent.next_sibling
-		bookmark['comment'] = sibling.string.strip()[:1000] if sibling and sibling.name == 'dd' else ''
+			# tags
+			bookmark['tags'] = []
+			tags = link.get('tags')
+			if tags:
+				bookmark['tags'] = tags.split(',')
 
-		current_link = Link()
-		current_link.profile = profile
-		current_link.url = bookmark['url']
-		current_link.title = bookmark['title']
-		current_link.created_on = bookmark['add_date']
-		current_link.public = bookmark['public']
-		current_link.comment = bookmark['comment']
+			# comment
+			sibling = link.parent.next_sibling
+			bookmark['comment'] = sibling.string.strip()[:1000] if sibling and sibling.name == 'dd' else ''
 
-		try:
-			current_link.save()
-			for t in  bookmark['tags']:
-				current_link.tags.add(t)
-		except IntegrityError: # duplicate entries
-			print( 'Integrity Error on: ', bookmark)
-		except DataError: # crazy data
-			print( 'Data Error on: ', bookmark)
+			current_link = Link()
+			current_link.profile = profile
+			current_link.url = bookmark['url']
+			current_link.title = bookmark['title']
+			current_link.created_on = bookmark['add_date']
+			current_link.public = bookmark['public']
+			current_link.comment = bookmark['comment']
 
-	return 'Y'
+			try:
+				current_link.save()
+				for t in  bookmark['tags']:
+					current_link.tags.add(t)
+				success_count += 1
+			except IntegrityError: # duplicate entries
+				print( 'Integrity Error on: ', bookmark)
+				dupe_count += 1
+			except DataError: # crazy data
+				print( 'Data Error on: ', bookmark)
+				error_count += 1
+
+	print('File Error:', file_error)
+	print('Success Count:', success_count)
+	print('Dupe Count:', dupe_count)
+	print('Error Count:', error_count)
+
+	if file_error is False:
+		import_status = 'Y'
+	else:
+		import_status = 'E'
+
+	if import_obj:
+		import_obj.status = import_status
+		import_obj.save()
+		send_import_email(import_obj,file_error, success_count, dupe_count, error_count)
+
+	return import_status
+
+def send_import_email(import_obj,file_error, success_count, dupe_count, error_count):
+
+	sender = 'infobot@bulkmarks.com'
+	subject = 'BULKmarks Import Results'
+	recipients = [import_obj.profile.user.email]
+
+	if file_error:
+		message = 'Your file was not imported. Please check your input and try again.'
+	else:
+		message = 'Good news! \n\nYour file has been imported into your BULKmarks account.'
+		message += '\n %d links were imported successfully.' % success_count
+		message += '\n %d links were duplicates of those already saved by you and were not imported.' % dupe_count
+		message += '\n %d links were rejected because a format or data error.' % error_count
+		message += '\n\n Thanks for using BULKmarks!'
+
+	if recipients:
+		print('Sending email',subject, message, sender, recipients)
+		send_mail(subject, message, sender, recipients)
 
 #-----------------------------------------------------------------------------#
-
-
 
 
 def export_links_to_netscape(profile_id):
@@ -154,7 +204,7 @@ def export_links_to_netscape(profile_id):
 
 
 
-
+@app.task()
 def test_all_links(profile_id):
 
 	profile = get_object_or_None(Profile,id=profile_id)

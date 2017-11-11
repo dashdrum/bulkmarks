@@ -18,7 +18,7 @@ except ImportError:
 	from datetime.datetime import now
 
 # from .utils import get_title
-from .choices import LINK_STATUS_CHOICES, IMPORT_TYPE_CHOICES
+from .choices import LINK_STATUS_CHOICES, IMPORT_TYPE_CHOICES, IMPORT_STATUS_CHOICES
 
 import uuid
 
@@ -124,7 +124,7 @@ class InterfaceFile(ModelBase):
 	file_type = models.CharField(max_length=1, null=False,blank=False)
 	text = models.TextField(null=False,blank=True)
 	file_format = models.CharField(max_length=1,null=False,blank=False, choices = IMPORT_TYPE_CHOICES)
-	status = models.CharField(max_length=1,null=False,blank=False,default='N') # No, Yes, Error
+	status = models.CharField(max_length=1,null=False,blank=False,default='N', choices = IMPORT_STATUS_CHOICES)
 
 	@property
 	def file_format_label(self):

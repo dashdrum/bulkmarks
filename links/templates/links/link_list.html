@@ -17,6 +17,12 @@
 <div class="row">
   <div class="col-md-7 col-md-offset-1" id="link-container">
 
+    {% if message %}
+      <div id="message">
+        <p><em>{{ message }}</em></p>
+      </div>
+    {% endif %}
+
     <h2>
       {% if search_term %}
         Search

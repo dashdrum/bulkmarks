@@ -1,6 +1,8 @@
 from __future__ import absolute_import #, unicode_literals
 import random
-from celery.decorators import task
+from celery import task
+
+
 
 @task(name="sum_two_numbers")
 def add(x, y):
