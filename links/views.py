@@ -314,7 +314,10 @@ class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 		instance.refresh_from_db()
 
 		if instance.file_format == 'D' or instance.file_format == 'N': # Netscape Bookmark File (Used by Delicious)
-			import_links_from_netscape.delay(instance.id)
+			if settings.USE_CELERY:
+				import_links_from_netscape.delay(instance.id)
+			else:
+				import_links_from_netscape(instance.id)
 		else:
 			# Form should catch this error.  How to report?
 			instance.status = 'E' # Unknown file format
@@ -389,7 +392,10 @@ class TestAllLinksView(LoginRequiredMixin, RedirectView):
 
 		profile = get_profile(self.request.user)
 
-		test_all_links.delay(profile.id)
+		if settings.USE_CELERY:
+			test_all_links.delay(profile.id)
+		else:
+			test_all_links(profile.id)
 
 		return super(TestAllLinksView, self).get(request, *args, **kwargs)
 
@@ -443,7 +449,10 @@ class DeleteUserLinksView(PermissionRequiredMixin,FormView):
 		self.user = form.cleaned_data.get('user_select',None)
 		self.profile = get_profile(self.user)
 
-		delete_user_links.delay(self.profile.id)
+		if settings.USE_CELERY:
+			delete_user_links.delay(self.profile.id)
+		else:
+			delete_user_links(self.profile.id)
 
 		return super(DeleteUserLinksView, self).form_valid(form)
 

@@ -161,6 +161,9 @@ REST_FRAMEWORK = {
 
 TAGGIT_CASE_INSENSITIVE = True
 
+# Default is not to use Celery
+USE_CELERY = False
+
 
 #-----------------------------------------------------------------------------#
 #

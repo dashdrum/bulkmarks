@@ -6,6 +6,8 @@ from .local_pg import *
 
 ## Celery settings
 
+USE_CELERY = True
+
 INSTALLED_APPS += ('django_celery_results',)
 
 CELERY_BROKER_URL = 'redis://localhost:6379'
