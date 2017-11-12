@@ -132,9 +132,9 @@ def send_import_email(import_obj,file_error, success_count, dupe_count, error_co
 		message = 'Your file was not imported. Please check your input and try again.'
 	else:
 		message = 'Good news! \n\nYour file has been imported into your BULKmarks account.'
-		message += '\n %d links were imported successfully.' % success_count
+		message += '\n\n %d links were imported successfully.' % success_count
 		message += '\n %d links were duplicates of those already saved by you and were not imported.' % dupe_count
-		message += '\n %d links were rejected because a format or data error.' % error_count
+		message += '\n %d links were rejected because of a format or data error.' % error_count
 		message += '\n\n Thanks for using BULKmarks!'
 
 	if recipients:
@@ -207,6 +207,11 @@ def export_links_to_netscape(profile_id):
 @app.task()
 def test_all_links(profile_id):
 
+	ok_count = 0
+	redirect_count = 0
+	error_count = 0
+	not_found_count = 0
+
 	profile = get_object_or_None(Profile,id=profile_id)
 
 	queryset = Link.objects.filter(profile=profile)
@@ -215,8 +220,54 @@ def test_all_links(profile_id):
 
 		status = test_link(link.id)
 
-		print('Status:', status, 'Title:', link.title[:20])
+		if status == 'O':
+			ok_count += 1
+		elif status == 'N':
+			not_found_count += 1
+		elif status == 'E':
+			error_count += 1
+		elif status == 'R':
+			redirect_count += 1
 
+		# print('Status:', status, 'Title:', link.title[:20])
 
+	print('OK Count:', ok_count)
+	print('Redirect Count:', redirect_count)
+	print('Not Found Count:', not_found_count)
+	print('Error Count:', error_count)
+
+	send_testall_email(profile,ok_count, not_found_count, redirect_count, error_count)
+
+def send_testall_email(profile,ok_count, not_found_count, redirect_count, error_count):
+
+	sender = 'infobot@bulkmarks.com'
+	subject = 'BULKmarks Links Test Results'
+	recipients = [profile.user.email]
+
+	message = 'Whew! \n\nAll of the links in your BULKmarks account have been tested.'
+	message += '\n\n %d links testd OK.' % ok_count
+	message += '\n %d links redirected to another URL.' % redirect_count
+	message += '\n %d links were not found.' % not_found_count
+	message += '\n %d links returned an error.' % error_count
+	message += '\n\n Thanks for using BULKmarks!'
+
+	if recipients:
+		print('Sending email',subject, message, sender, recipients)
+		send_mail(subject, message, sender, recipients)
+
+#-----------------------------------------------------------------------------#
+
+@app.task()
+def delete_user_links(profile_id):
+
+	delete_count = 0
+
+	profile = get_object_or_None(Profile,id=profile_id)
+
+	for l in Link.objects.filter(profile=profile):
+		l.delete()
+		delete_count += 1
+
+	print('Delete Count:', delete_count)
 
 

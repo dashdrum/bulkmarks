@@ -34,7 +34,7 @@ from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm
 					SearchInputForm, TagInputForm, )
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
-from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, )
+from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, delete_user_links )
 from .messages import messages
 
 class PageFive(Page):
@@ -395,7 +395,7 @@ class TestAllLinksView(LoginRequiredMixin, RedirectView):
 
 	def get_redirect_url(self, *args, **kwargs):
 
-		return reverse('userlinks')
+		return reverse('linksentry') + '?mid=TESTSTART'
 
 class VisitLinkView(SingleObjectMixin, RedirectView):
 
@@ -443,13 +443,12 @@ class DeleteUserLinksView(PermissionRequiredMixin,FormView):
 		self.user = form.cleaned_data.get('user_select',None)
 		self.profile = get_profile(self.user)
 
-		for l in Link.objects.filter(profile=self.profile):
-			l.delete()
+		delete_user_links.delay(self.profile.id)
 
 		return super(DeleteUserLinksView, self).form_valid(form)
 
 	def get_success_url(self):
-		return reverse('links', kwargs={'scope': self.profile.user.username})
+		return reverse('links', kwargs={'scope': self.profile.user.username})  + '?mid=DELETEUSERLINKS'
 
 
 
