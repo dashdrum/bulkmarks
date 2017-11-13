@@ -31,7 +31,7 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView
 from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from .models import Link, Profile, InterfaceFile
 from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm, DeleteUserLinksInputForm,
-					SearchInputForm, TagInputForm, )
+					SearchInputForm, TagInputForm, ProfileForm, )
 from .utils import get_title, get_profile, test_link
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, delete_user_links )
@@ -70,7 +70,18 @@ class PaginatorFive(Paginator):
 		"""
 		return PageFive(*args, **kwargs)
 
-class LinkListView(FormMixin, ListView):
+class ProfileContext(object):
+
+	def get_context_data(self, **kwargs):
+
+		context = super(ProfileContext,self).get_context_data(**kwargs)
+
+		if self.request.user.is_authenticated:
+			context['profile'] = get_profile(self.request.user)
+
+		return context
+
+class LinkListView(ProfileContext, FormMixin, ListView):
 	model = Link
 	ordering =  ['-created_on']
 	paginate_by = 10
@@ -191,7 +202,7 @@ class TagLinkListView(LoginRequiredMixin,LinkListView):
 		return reverse('taglinks', kwargs={'scope': scope, 'tag': searchtag})
 
 
-class LinkDetailView(LoginRequiredMixin,DetailView):
+class LinkDetailView(LoginRequiredMixin, ProfileContext, DetailView):
 	model = Link
 
 	def get_object(self, queryset=None):
@@ -206,7 +217,7 @@ class LinkDetailView(LoginRequiredMixin,DetailView):
 		raise Http404()
 
 
-class LinkCreateView(LoginRequiredMixin,CreateView):
+class LinkCreateView(LoginRequiredMixin, ProfileContext, CreateView):
 	model = Link
 	form_class = LinkForm
 
@@ -250,8 +261,7 @@ class LinkCreateView(LoginRequiredMixin,CreateView):
 			form.add_error('url','URL has already been saved')
 			return self.render_to_response(self.get_context_data(form=form))
 
-
-class LinkUpdateView(LoginRequiredMixin,UpdateView):
+class LinkUpdateView(LoginRequiredMixin, ProfileContext, UpdateView):
 	model = Link
 	form_class = LinkForm
 
@@ -270,7 +280,7 @@ class LinkUpdateView(LoginRequiredMixin,UpdateView):
 		raise Http404()
 
 
-class LinkDeleteView(LoginRequiredMixin, SuccessURLRedirectListMixin, DeleteView):
+class LinkDeleteView(LoginRequiredMixin, ProfileContext, SuccessURLRedirectListMixin, DeleteView):
 
 	model=Link
 	success_list_url = 'linksentry'
@@ -286,7 +296,27 @@ class LinkDeleteView(LoginRequiredMixin, SuccessURLRedirectListMixin, DeleteView
 
 		raise Http404()
 
-class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
+class ProfileDetailView(LoginRequiredMixin, ProfileContext, DetailView):
+	model = Profile
+
+class ProfileUpdateView(LoginRequiredMixin, ProfileContext, UpdateView):
+	model = Profile
+	form_class = ProfileForm
+
+	def get_success_url(self):
+		return reverse('profiledetail' , kwargs={'pk': self.object.id })
+
+	def get_initial(self):
+
+		initial = super(ProfileUpdateView,self).get_initial()
+
+		initial['first_name'] = self.object.user.first_name
+		initial['last_name'] = self.object.user.last_name
+		initial['email'] = self.object.user.email
+
+		return initial
+
+class UploadImportFileTemplateView(LoginRequiredMixin, ProfileContext, FormView):
 
 	form_class = ImportFileForm
 	template_name = 'links/import.html'
@@ -327,7 +357,7 @@ class UploadImportFileTemplateView(LoginRequiredMixin,FormView):
 
 from django.core.files import File
 
-class ExportLinksView(LoginRequiredMixin,FormView):
+class ExportLinksView(LoginRequiredMixin, ProfileContext, FormView):
 
 	form_class = ExportFileForm
 	template_name = 'links/export.html'
@@ -357,7 +387,7 @@ class ExportLinksView(LoginRequiredMixin,FormView):
 
 		# No super call needed
 
-class TestLinkView(LoginRequiredMixin,SingleObjectMixin, RedirectView):
+class TestLinkView(LoginRequiredMixin, ProfileContext, SingleObjectMixin, RedirectView):
 
 	''' test the link them redisplay details page '''
 
@@ -386,7 +416,7 @@ class TestLinkView(LoginRequiredMixin,SingleObjectMixin, RedirectView):
 
 		return HttpResponseRedirect(self.get_redirect_url(*args,**kwargs))
 
-class TestAllLinksView(LoginRequiredMixin, RedirectView):
+class TestAllLinksView(LoginRequiredMixin, ProfileContext, RedirectView):
 
 	def get(self, request, *args, **kwargs):
 
@@ -403,7 +433,7 @@ class TestAllLinksView(LoginRequiredMixin, RedirectView):
 
 		return reverse('linksentry') + '?mid=TESTSTART'
 
-class VisitLinkView(SingleObjectMixin, RedirectView):
+class VisitLinkView(SingleObjectMixin, ProfileContext, RedirectView):
 
 	model = Link
 
@@ -439,7 +469,7 @@ class VisitLinkView(SingleObjectMixin, RedirectView):
 
 		raise Http404()
 
-class DeleteUserLinksView(PermissionRequiredMixin,FormView):
+class DeleteUserLinksView(PermissionRequiredMixin, ProfileContext, FormView):
 	form_class = DeleteUserLinksInputForm
 	template_name = "links/delete_user_links.html"
 	permission_required = "links.delete_link"

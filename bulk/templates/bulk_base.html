@@ -19,6 +19,22 @@
 	{{ block.super }}
 {% endblock nav_items %}
 
+{% block user_items %}
+	{% if user.is_authenticated %}
+		<li>
+		  <a href="#" name="profile" class="dropdown-toggle"  data-toggle="dropdown">Profile
+		  <span class="caret"></span></a>
+		  <ul class="dropdown-menu">
+		    <li><a href="{% url 'profileupdate' pk=profile.id %}">Edit Profile</a></li>
+		    <li><a href="{% url 'password_change' %}">Change Password</a></li>
+		    <li><a href="{% url 'logout' %}">{{ user.get_username|upper }} Sign Out</a></li>
+		  </ul>
+		</li>
+	{% else %}
+        <li><a href="{% url 'login' %}">Sign In</a></li>
+    {% endif %}
+{% endblock user_items %}
+
 {% block contentheader %}
 {{block.super}}
 

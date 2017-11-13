@@ -101,12 +101,9 @@ class Link(ModelBase):
 class Profile(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL,null=False)
-	public_default = models.BooleanField(default=True)
-	acct_public = models.BooleanField(default=True)
+	public_default = models.BooleanField(default=True) # default value for public field on link
+	acct_public = models.BooleanField(default=True)    # is account visible to others
 	display_name = models.CharField(max_length=200,null=False,blank=False)
-	email = models.EmailField(null=False,blank=False)
-	url = models.URLField(max_length=400,blank=True,null=True)
-	notes = models.TextField(max_length=1000, null=True, blank=True)
 
 	def __str__(self):
 		return self.display_name

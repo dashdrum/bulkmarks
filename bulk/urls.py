@@ -16,6 +16,8 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.forms import PasswordChangeForm
+
 
 from .views import IndexView
 
@@ -24,8 +26,12 @@ urlpatterns = [
     url(r'^l/', include('links.urls')),
     url(r'^m/', include('marketing.urls')),
 
-    url(r'^login/$', auth_views.login,{'template_name': 'login.html'},name='login'),
-    url(r'^logout/$', auth_views.logout,{'next_page': '/'},name='logout'),
+    url(r'^login/$', auth_views.LoginView.as_view(template_name='login.html'),name='login'),
+    url(r'^logout/$', auth_views.LogoutView.as_view(),name='logout'),
+    url(r'^change-password/$', auth_views.PasswordChangeView.as_view(
+            template_name='password_change_form.html',
+            success_url='/' ),
+        name='password_change'),
 
     url(r'^$',IndexView.as_view(),name='index'),
 ]

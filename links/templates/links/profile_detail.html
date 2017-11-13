@@ -1,0 +1,41 @@
+{% extends "links_base.html" %}
+{% load staticfiles %}
+
+
+{% block title %}{{ block.super }} - Profile{% endblock title %}
+
+{% block css_custom %}
+	{{ block.super }}
+
+{% endblock css_custom %}{% block js.custom %}
+	{{ block.super }}
+
+{% endblock js.custom %}
+
+
+{% block page_title %}Profile{% endblock page_title %}
+
+{% block content %}
+
+<div class="row">
+	<div id="profileInformation" class="col-md-10 col-md-offset-1">
+		<h1>Profile Information</h1>
+		<p><label for="title">Username:</label> {{ object.user.username }}</p>
+		<p><label for="url">Email:</label> {{ object.user.email }}</p>
+		<p><label for="url">Display Name:</label> {{ object.display_name }}</p>
+		<p><label for="comment">First Name:</label> {{ object.user.first_name }}</p>
+		<p><label for="public">Last Name:</label> {{ object.user.last_name }}</p>
+		<p><label for="public">Public Account:</label> {{ object.acct_public }}</p>
+		<p><label for="public">Default Link Public:</label> {{ object.public_default }}</p>
+
+		<p><label for="created_on">created_on:</label> {{ object.created_on }}</p>
+		<p><label for="updated_on">updated_on:</label> {{ object.updated_on }}</p>
+		<p><label for="id">ID:</label> {{ object.id }}</p>
+		<a href="{% url 'profileupdate' object.id %}">Edit</a>
+
+	</div>
+</div>
+
+
+
+{% endblock content %}

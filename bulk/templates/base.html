@@ -60,11 +60,13 @@
 						{% endif %}
 						<!-- nav items here as <li> -->
 					{% endblock nav_items %}
-					{% if user.is_authenticated %}
-		                <li><a href="{% url 'logout' %}">{{ user.get_username|upper }} Sign Out</a></li>
-		            {% else %}
-		                <li><a href="{% url 'login' %}">Sign In</a></li>
-		            {% endif %}
+					{% block user_items %}
+						{% if user.is_authenticated %}
+			                <li><a href="{% url 'logout' %}">{{ user.get_username|upper }} Sign Out</a></li>
+			            {% else %}
+			                <li><a href="{% url 'login' %}">Sign In</a></li>
+			            {% endif %}
+			         {% endblock user_items %}
 
 				</ul>
 			</div><!-- /.navbar-collapse -->
