@@ -27,11 +27,11 @@
 		  <ul class="dropdown-menu">
 		    <li><a href="{% url 'profileupdate' pk=profile.id %}">Edit Profile</a></li>
 		    <li><a href="{% url 'password_change' %}">Change Password</a></li>
-		    <li><a href="{% url 'logout' %}">{{ user.get_username|upper }} Sign Out</a></li>
+		    <li><a href="{% url 'logout' %}">{{ user.get_username|upper }} Log Out</a></li>
 		  </ul>
 		</li>
 	{% else %}
-        <li><a href="{% url 'login' %}">Sign In</a></li>
+        <li><a href="{% url 'login' %}">Log In</a></li>
     {% endif %}
 {% endblock user_items %}
 
