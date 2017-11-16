@@ -115,10 +115,15 @@ class LinkListView(ProfileContext, FormMixin, ListView):
 			self.profile = get_profile(user)
 			qs = qs.filter(profile=self.profile)
 		elif self.scope == 'public':
-			qs = qs.filter(public=True)
+			qs = qs.filter(public=True, profile__acct_public = True)
 		else:
 			self.profile = get_object_or_None(Profile,user__username=self.scope)
-			qs = qs.filter(profile=self.profile, public = True)
+			if self.request.user.is_superuser:
+				qs = qs.filter(profile=self.profile)
+			elif self.profile.acct_public is False:
+				raise Http404
+			else:
+				qs = qs.filter(profile=self.profile, public = True)
 		return qs
 
 	def get_queryset(self):
@@ -130,7 +135,7 @@ class LinkListView(ProfileContext, FormMixin, ListView):
 	def get_context_data(self, **kwargs):
 
 		context = super(LinkListView,self).get_context_data(**kwargs)
-		context['latest_public'] = Link.objects.filter(public = True).order_by('-created_on')
+		context['latest_public'] = Link.objects.filter(public = True, profile__acct_public = True).order_by('-created_on')
 		context['scope'] = self.scope
 		context['searchform'] = self.search_form_class(initial= {'scope': self.scope})
 		context['tagform'] = self.tag_form_class(initial= {'scope': self.scope})
@@ -180,7 +185,7 @@ class TagLinkListView(LoginRequiredMixin,LinkListView):
 	def get_queryset(self):
 		qs = super(TagLinkListView,self).get_queryset()
 		tag = self.kwargs.get('tag',None)
-		self.queryset = qs.filter(tags__name__in=[tag],public=True)
+		self.queryset = qs.filter(tags__name__in=[tag],public=True, profile__acct_public = True)
 		return self.queryset
 
 	def get_context_data(self, **kwargs):
@@ -211,7 +216,7 @@ class LinkDetailView(LoginRequiredMixin, ProfileContext, DetailView):
 
 		user = self.request.user
 
-		if user == object.profile.user or object.public is True:
+		if user == object.profile.user or (object.public is True and object.profile.acct_public is True):
 			return object
 
 		raise Http404()
@@ -464,7 +469,7 @@ class VisitLinkView(SingleObjectMixin, ProfileContext, RedirectView):
 		if user == object.profile.user:
 			test_link(object.id)
 
-		if user == object.profile.user or object.public is True:
+		if user == object.profile.user or (object.public is True and object.profile.acct_public is True):
 			return object
 
 		raise Http404()

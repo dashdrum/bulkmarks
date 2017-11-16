@@ -100,7 +100,7 @@ class Link(ModelBase):
 
 class Profile(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	user = models.ForeignKey(settings.AUTH_USER_MODEL,null=False)
+	user = models.OneToOneField(settings.AUTH_USER_MODEL,null=False)
 	public_default = models.BooleanField(default=True) # default value for public field on link
 	acct_public = models.BooleanField(default=True)    # is account visible to others
 	display_name = models.CharField(max_length=200,null=False,blank=False)

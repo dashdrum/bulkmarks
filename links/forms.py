@@ -88,8 +88,9 @@ class OtherUserInputForm(ActiveUserInputForm):
 
 	def __init__(self, *args, **kwargs):
 		super(OtherUserInputForm, self).__init__(*args, **kwargs)
+		qs = self.fields['user_select'].queryset
+		self.fields['user_select'].queryset = qs.filter( profile__acct_public = True)
 		self.fields['user_select'].label='View another user\'s public links'
-
 
 class DeleteUserLinksInputForm(ActiveUserInputForm):
 
