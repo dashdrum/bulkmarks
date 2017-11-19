@@ -1,0 +1,65 @@
+{% extends 'links_base.html' %}
+
+{% load static %}
+
+{% load widget_tweaks %}
+
+{% block title %}{{ block.super }} - Infinite List{% endblock title %}
+
+{% block js.custom %}
+<script src="{% static 'links/js/jquery.waypoints.min.js' %}"></script>
+<script src="{% static 'links/js/shortcuts/infinite.min.js' %}"></script>
+{% endblock js.custom %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-7 col-md-offset-1" id="link-container">
+
+    <dl id="link-list">
+      <div class="infinite-container">
+        {% for o in object_list %}
+          <div class="infinite-item link">
+            <dt><a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
+            {% if o.comment %}
+              <dd>{{ o.comment|slice:":180"}}</dd>
+            {% endif %}
+            {% for t in  o.tags.names %}
+              {% if forloop.first %}<dd>Tags: {% endif %}
+                <a href="{% url 'taglinks' scope t %}" title="Tag search for {{ t }}">
+              {{ t }}</a>
+              {% if not forloop.last%}, {% endif %}
+              {% if forloop.last%}</dd>{% endif %}
+            {% endfor %} <!-- tags.names -->
+          </div> <!-- ilink-item, link -->
+        {% endfor %} <!-- object-list -->
+      </div> <!-- ilink-container -->
+    </dl>
+
+  </div> <!-- link-container -->
+
+</div> <!-- row -->
+
+
+
+  <div class="loading" style="display: none;">
+    Loading...
+  </div>
+
+  {% if page_obj.has_next %}
+    <a class="infinite-more-link" href="?page={{ page_obj.next_page_number }}">More</a>
+  {% endif %}
+
+  <script>
+    var infinite = new Waypoint.Infinite({
+      element: $('.infinite-container')[0],
+      onBeforePageLoad: function () {
+        $('.loading').show();
+      },
+      onAfterPageLoad: function ($items) {
+        $('.loading').hide();
+      }
+    });
+  </script>
+
+{% endblock content %}

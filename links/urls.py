@@ -18,7 +18,7 @@ from .views import (LinkListView, LinkDetailView, LinkCreateView, LinkUpdateView
 					UploadImportFileTemplateView, TestLinkView, VisitLinkView,
 					ExportLinksView, LinkDeleteView, SearchLinkListView,
 					TestAllLinksView, DeleteUserLinksView, TagLinkListView,
-					ProfileDetailView, ProfileUpdateView, )
+					ProfileDetailView, ProfileUpdateView, InfiniteLinkListView, )
 from .views import link_create
 from .views import (GetTitleAPIView, AddURLAPIView, TestLinkAPIView,)
 
@@ -42,6 +42,9 @@ urlpatterns = [
 
 	url(r'^profiledetail/(?P<pk>[0-9A-Fa-f-]+)/$',ProfileDetailView.as_view(),name='profiledetail'),
 	url(r'^profileupdate/(?P<pk>[0-9A-Fa-f-]+)/$',ProfileUpdateView.as_view(),name='profileupdate'),
+
+	url(r'^infinitelinks/$', InfiniteLinkListView.as_view(), name='infinitelinksentry'),
+
 
 
 	## Admin links

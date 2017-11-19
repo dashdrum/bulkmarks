@@ -206,6 +206,14 @@ class TagLinkListView(LoginRequiredMixin,LinkListView):
 		searchtag = self.form.cleaned_data.get('searchtag',None)
 		return reverse('taglinks', kwargs={'scope': scope, 'tag': searchtag})
 
+class InfiniteLinkListView(ListView):
+	model = Link
+	ordering =  ['-created_on']
+	paginate_by = 20
+	template_name = 'links/infinite_link_list.html'
+
+
+
 
 class LinkDetailView(LoginRequiredMixin, ProfileContext, DetailView):
 	model = Link
