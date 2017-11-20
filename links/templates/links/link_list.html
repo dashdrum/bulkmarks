@@ -5,9 +5,8 @@
 {% load widget_tweaks %}
 
 {% block js.custom %}
-
-
-
+<script src="{% static 'links/js/jquery.waypoints.min.js' %}"></script>
+<script src="{% static 'links/js/shortcuts/infinite.min.js' %}"></script>
 {% endblock js.custom %}
 
 {% block title %}{{ block.super }} - List{% endblock title %}
@@ -41,51 +40,50 @@
     </h2>
 
     <dl id="link-list">
-      {% for o in object_list %}
-        <div class="link">
-          <dt><a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
-          {% if o.comment %}
-            <dd>{{ o.comment|slice:":180"}}</dd>
-          {% endif %}
-          {% for t in  o.tags.names %}
-            {% if forloop.first %}<dd>Tags: {% endif %}
-              <a href="{% url 'taglinks' scope t %}" title="Tag search for {{ t }}">
-            {{ t }}</a>
-            {% if not forloop.last%}, {% endif %}
-            {% if forloop.last%}</dd>{% endif %}
-          {% endfor %}
-          {% if user == o.profile.user or user.is_superuser %}
-            (<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
-          {% endif %}
-          {% if user != o.profile.user and user.is_authenticated %}
-            (<a href="{% url 'linkcopy' o.id %}" title="Copy to my link list">Copy</a>)
-          {% endif %}
-        </div> <!-- Link -->
-      {% endfor %}
+      <div class="infinite-container">
+        {% for o in object_list %}
+          <div class="infinite-item link">
+            <dt><a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
+            {% if o.comment %}
+              <dd>{{ o.comment|slice:":180"}}</dd>
+            {% endif %}
+            {% for t in  o.tags.names %}
+              {% if forloop.first %}<dd>Tags: {% endif %}
+                <a href="{% url 'taglinks' scope t %}" title="Tag search for {{ t }}">
+              {{ t }}</a>
+              {% if not forloop.last%}, {% endif %}
+              {% if forloop.last%}</dd>{% endif %}
+            {% endfor %} <!-- tags.names -->
+            {% if user == o.profile.user or user.is_superuser %}
+              (<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
+            {% endif %}
+            {% if user != o.profile.user and user.is_authenticated %}
+              (<a href="{% url 'linkcopy' o.id %}" title="Copy to my link list">Copy</a>)
+            {% endif %}
+          </div> <!-- infinite-item, link -->
+        {% endfor %} <!-- object-list -->
+      </div> <!-- infinite-container -->
     </dl>
 
-    <!-- PaginatorFive navigation buttons -->
-    {% if is_paginated %}
-      <ul class="pagination pagination-centered">
-          {% if page_obj.has_previous %}
-              <li><a href="?page=1">First</a></li>
-              {% if page_obj.has_previous_five %}
-                  <li><a href="?page={{ page_obj.previous_five_page_number }}">Back 5</a></li>
-              {% endif %}
-              <li><a href="?page={{ page_obj.previous_page_number }}">Prev</a></li>
-          {% endif %}
+    <div class="loading" style="display: none;">
+      Loading...
+    </div>
 
-          <li class="active" ><a href="?page={{page_obj.number}}">{{page_obj.number}} of {{ paginator.num_pages }}</a></li>
-
-          {% if page_obj.has_next %}
-              <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
-              {% if page_obj.has_next_five %}
-                  <li><a href="?page={{ page_obj.next_five_page_number }}">Ahead 5</a></li>
-              {% endif %}
-              <li><a href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
-          {% endif %}
-      </ul>
+    {% if page_obj.has_next %}
+      <a class="infinite-more-link" href="?page={{ page_obj.next_page_number }}">More</a>
     {% endif %}
+
+    <script>
+      var infinite = new Waypoint.Infinite({
+        element: $('.infinite-container')[0],
+        onBeforePageLoad: function () {
+          $('.loading').show();
+        },
+        onAfterPageLoad: function ($items) {
+          $('.loading').hide();
+        }
+      });
+    </script>
 
   </div> <!-- link-container -->
 
@@ -166,15 +164,6 @@
 
   </div> <!-- col -->
 </div> <!-- row -->
-
-
-<!-- THE MODAL WE WILL BE USING -->
-<div class="modal fade" id="modal-link">
-  <div class="modal-dialog">
-    <div class="modal-content">
-    </div>
-  </div>
-</div>
 
 {% endblock content %}
 
