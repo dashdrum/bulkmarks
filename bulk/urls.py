@@ -48,7 +48,7 @@ from django.conf import settings
 
 if 'debug_toolbar' in settings.INSTALLED_APPS:
 	from debug_toolbar import urls as debug_urls
-	urlpatterns.append(url(r'^__debug__',include(debug_urls)))
+	urlpatterns.append(url(r'^__debug__/',include(debug_urls)))
 
 ### Heartbeat
 
