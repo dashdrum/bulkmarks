@@ -20,7 +20,6 @@ DATABASES = {
 ## Django Debug Toolbar settings
 
 INSTALLED_APPS += ('debug_toolbar',)
-##MIDDLEWARE += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 MIDDLEWARE.insert(2,'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 DEBUG_TOOLBAR_PANELS = [
@@ -45,7 +44,6 @@ def custom_show_toolbar(request):
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': 'bulk.settings.local_pg.custom_show_toolbar',
 }
-
 
 ## end Django Debug Toolbar settings
 

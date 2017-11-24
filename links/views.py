@@ -94,6 +94,7 @@ class LinkListView(ProfileContext, FormMixin, ListView):
 	def get_queryset(self):
 		self.profile = None
 		qs = self.add_scope(Link.objects)
+		qs = qs.select_related('profile').prefetch_related('profile__user')
 		self.queryset = qs
 		return super(LinkListView,self).get_queryset()
 
@@ -474,6 +475,7 @@ class SearchLinkListView(LoginRequiredMixin,LinkListView):
 	def get_queryset(self):
 		self.profile = None
 		qs = self.add_scope(Link.search_objects.search(self.searchparam))
+		qs = qs.select_related('profile').prefetch_related('profile__user')
 		self.queryset = qs
 		return super(LinkListView,self).get_queryset() # Super of LinkListView, not current class
 

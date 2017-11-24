@@ -22,7 +22,7 @@ def get_title(url):
 	try:
 		## Need to change the agent to fool sites that want to block python bots
 		## (Should be harder than this to fool someone)
-		page = urlopen(Request(url,headers={'User-Agent': 'Mozilla'}))
+		page = urlopen(Request(url,headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:57.0) Gecko/20100101 Firefox/57.0'}))
 		try:
 			soup = BeautifulSoup(page,'html.parser')
 			try:
