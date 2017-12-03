@@ -73,7 +73,7 @@ class AddURLLinkSerializer(LinkSerializer):
 
 	class Meta:
 		model = Link
-		fields = ('id','title','url','comment','public')
+		fields = ('id','title','url','comment','public','tags')
 
 
 class TestLinkSerializer(LinkSerializer):

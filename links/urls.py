@@ -13,7 +13,7 @@ Including another URLconf
 	1. Import the include() function: from django.conf.urls import url, include
 	2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url, include
 from .views import (LinkListView, LinkDetailView, LinkCreateView, LinkUpdateView,
 					UploadImportFileTemplateView, TestLinkView, VisitLinkView,
 					ExportLinksView, LinkDeleteView, SearchLinkListView,
@@ -21,6 +21,12 @@ from .views import (LinkListView, LinkDetailView, LinkCreateView, LinkUpdateView
 					ProfileDetailView, ProfileUpdateView,  )
 from .views import link_create
 from .views import (GetTitleAPIView, AddURLAPIView, TestLinkAPIView,)
+
+from rest_framework import routers
+from .views import AddURLViewSet
+
+router = routers.DefaultRouter()
+router.register(r'api/links', AddURLViewSet)
 
 urlpatterns = [
 	url(r'^links/$', LinkListView.as_view(), name='linksentry'),
@@ -54,6 +60,8 @@ urlpatterns = [
 	url(r'^create/$',link_create, name='link_create'),
 
 	## API
+
+	url(r'^', include(router.urls)),
 
 	url(r'^api/gettitle/$',GetTitleAPIView.as_view(),name='gettitle'),
 	url(r'^api/addurl/$',AddURLAPIView.as_view(),name='addurl'),

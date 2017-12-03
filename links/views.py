@@ -552,6 +552,13 @@ class AddURLAPIView(CreateAPIView):
 
 	# 	## Test with: curl -v --data-ascii url="http://nmc.edu" http://localhost:8000/l/api/addurl/
 
+class AddURLViewSet(viewsets.ModelViewSet):
+	"""
+	API endpoint that allows users to be viewed or edited.
+	"""
+	queryset = Link.objects.all().order_by('-created_on')
+	serializer_class = LinkSerializer
+
 
 
 class TestLinkAPIView(ProfileCheckMixin,UpdateAPIView):
