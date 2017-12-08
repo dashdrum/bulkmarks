@@ -3,7 +3,7 @@ import operator
 
 from django.db import models
 from django.db.models import Q
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from snips.models import ModelBase
 from annoying.functions import get_object_or_None
@@ -57,7 +57,7 @@ class Link(ModelBase):
 	comment = models.TextField(max_length=1000, null=True, blank=True)
 	public = models.BooleanField(default=True)
 	status = models.CharField(max_length=1,blank=True,null=True,choices = LINK_STATUS_CHOICES)
-	profile = models.ForeignKey('Profile',null=False,blank=False)
+	profile = models.ForeignKey('Profile',null=False,blank=False,on_delete=models.CASCADE)
 	tested_on = models.DateTimeField(blank=True,null=True)
 
 	tags = TaggableManager(through=GenericUUIDTaggedItem)
@@ -100,7 +100,7 @@ class Link(ModelBase):
 
 class Profile(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	user = models.OneToOneField(settings.AUTH_USER_MODEL,null=False)
+	user = models.OneToOneField(settings.AUTH_USER_MODEL,null=False,on_delete=models.CASCADE)
 	public_default = models.BooleanField(default=True) # default value for public field on link
 	acct_public = models.BooleanField(default=True)    # is account visible to others
 	display_name = models.CharField(max_length=200,null=False,blank=False)
@@ -116,7 +116,7 @@ class Profile(ModelBase):
 
 class InterfaceFile(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	profile = models.ForeignKey('Profile',null=False,blank=False)
+	profile = models.ForeignKey('Profile',null=False,blank=False,on_delete=models.CASCADE)
 	file_name = models.CharField(max_length=500,null=True,blank=True)
 	file_type = models.CharField(max_length=1, null=False,blank=False)
 	text = models.TextField(null=False,blank=True)

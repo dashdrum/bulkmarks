@@ -1,6 +1,6 @@
 from django.views.generic import RedirectView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 class IndexView(RedirectView):
 

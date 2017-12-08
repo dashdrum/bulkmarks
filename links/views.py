@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin,LoginRequiredMixi
 from django.http import (HttpResponseRedirect, Http404, HttpResponse, HttpResponseForbidden, HttpResponseGone,
 						 HttpResponseBadRequest)
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.timezone import make_aware, utc

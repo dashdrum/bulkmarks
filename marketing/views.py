@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from django.views.generic import (FormView, TemplateView, ListView, CreateView,
 									DetailView, UpdateView, RedirectView)
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from .forms import SignupQuickForm
 from .models import Signup
