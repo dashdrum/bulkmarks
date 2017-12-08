@@ -4,7 +4,7 @@ from django.forms import (ModelForm, ValidationError, )
 from annoying.functions import get_object_or_None
 
 from .models import Signup
-from links.models import Profile
+from django.contrib.auth.models import User
 
 class SignupQuickForm(ModelForm):
 
@@ -14,9 +14,9 @@ class SignupQuickForm(ModelForm):
 
 		if email:
 			try:
-				profile = Profile.objects.get(email=email)
+				user = User.objects.get(email=email)
 				raise ValidationError('Email already registered')
-			except Profile.DoesNotExist:
+			except User.DoesNotExist:
 				pass  #  This is OK
 
 		return email
