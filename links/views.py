@@ -31,7 +31,8 @@ from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerialize
 from .models import Link, Profile, InterfaceFile
 from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm, DeleteUserLinksInputForm,
 					SearchInputForm, TagInputForm, ProfileForm, )
-from .utils import get_title, get_profile, test_link
+from .utils import get_profile, test_link
+from .link_utils import get_title
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, delete_user_links )
 from .messages import messages
@@ -301,7 +302,7 @@ class UploadImportFileTemplateView(LoginRequiredMixin, ProfileContext, FormView)
 
 		instance = InterfaceFile()
 		instance.profile = get_profile(user)
-		instance.file_format = form.cleaned_data['import_type']
+		instance.file_format = form.cleaned_data['import_format']
 		instance.file_type = 'I'  ## This is an import file
 
 		f = self.request.FILES['import_file']
