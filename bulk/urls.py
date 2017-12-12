@@ -14,12 +14,13 @@ Including another URLconf
 	2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.conf.urls import handler404, handler500
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.forms import PasswordChangeForm
 
 
-from .views import IndexView
+from .views import IndexView, Error404View, Error500View
 
 urlpatterns = [
 	url(r'^a/', admin.site.urls),
@@ -58,3 +59,7 @@ if 'heartbeat' in settings.INSTALLED_APPS:
   urlpatterns += [
 	url(r'^heartbeat/', include(heartbeat_urls))
   ]
+
+
+handler404 = Error404View.as_view()
+handler500 = Error500View.as_view()
