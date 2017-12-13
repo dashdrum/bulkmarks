@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 from django.utils.timezone import make_aware, utc
 from django.utils.html import escape
 from django.db import IntegrityError
+from django.db import transaction
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 
 from braces.views import SuccessURLRedirectListMixin
@@ -31,7 +32,8 @@ from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerialize
 from .models import Link, Profile, InterfaceFile
 from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm, DeleteUserLinksInputForm,
 					SearchInputForm, TagInputForm, ProfileForm, )
-from .utils import get_title, get_profile, test_link
+from .utils import get_profile, test_link
+from .link_utils import get_title
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, delete_user_links )
 from .messages import messages
@@ -224,7 +226,8 @@ class LinkCreateView(LoginRequiredMixin, ProfileContext, CreateView):
 			# Save object and show success
 			self.object = form.save(commit=False)
 			self.object.profile = profile
-			self.object.save()
+			with transaction.atomic():
+				self.object.save()
 			form.save_m2m()
 			return HttpResponseRedirect(self.get_success_url())
 		except IntegrityError as e:
@@ -301,7 +304,7 @@ class UploadImportFileTemplateView(LoginRequiredMixin, ProfileContext, FormView)
 
 		instance = InterfaceFile()
 		instance.profile = get_profile(user)
-		instance.file_format = form.cleaned_data['import_type']
+		instance.file_format = form.cleaned_data['import_format']
 		instance.file_type = 'I'  ## This is an import file
 
 		f = self.request.FILES['import_file']
@@ -418,9 +421,9 @@ class VisitLinkView(SingleObjectMixin, ProfileContext, RedirectView):
 			if url:
 				return HttpResponseRedirect(url)
 			else:
-				return HttpResponseGone()
+				return HttpResponseGone()    ## Never
 		else:
-			return HttpResponseForbidden()
+			return HttpResponseForbidden()   ## Never
 
 	def get_redirect_url(self, *args, **kwargs):
 

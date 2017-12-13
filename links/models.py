@@ -17,8 +17,8 @@ try:
 except ImportError:
 	from datetime.datetime import now
 
-# from .utils import get_title
-from .choices import LINK_STATUS_CHOICES, IMPORT_TYPE_CHOICES, IMPORT_STATUS_CHOICES
+from .link_utils import get_title
+from .choices import LINK_STATUS_CHOICES, IMPORT_FORMAT_CHOICES, IMPORT_STATUS_CHOICES
 
 import uuid
 
@@ -31,24 +31,24 @@ from taggit.managers import TaggableManager
 from taggit.models import CommonGenericTaggedItemBase, TaggedItemBase
 
 class GenericUUIDTaggedItem(CommonGenericTaggedItemBase, TaggedItemBase):
-    object_id = models.UUIDField(verbose_name='Object id', db_index=True)
+	object_id = models.UUIDField(verbose_name='Object id', db_index=True)
 
 #-----------------------------------------------------------------------------#
 
 class LinkSearchManager(models.Manager):
-    def search(self, search_terms):
-        terms = [term.strip() for term in search_terms.split()]
-        q_objects = []
+	def search(self, search_terms):
+		terms = [term.strip() for term in search_terms.split()]
+		q_objects = []
 
-        for term in terms:
-            q_objects.append(Q(title__icontains=term))
-            q_objects.append(Q(comment__icontains=term))
+		for term in terms:
+			q_objects.append(Q(title__icontains=term))
+			q_objects.append(Q(comment__icontains=term))
 
-        # Start with a bare QuerySet
-        qs = self.get_queryset()
+		# Start with a bare QuerySet
+		qs = self.get_queryset()
 
-        # Use operator's or_ to string together all of your Q objects.
-        return qs.filter(reduce(operator.or_, q_objects))
+		# Use operator's or_ to string together all of your Q objects.
+		return qs.filter(reduce(operator.or_, q_objects))
 
 class Link(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -78,6 +78,9 @@ class Link(ModelBase):
 
 	def __str__(self):
 		return self.title
+
+	def get_absolute_url(self):
+		return reverse('linkdetail', args=[str(self.id)])
 
 	def save(self,*args, **kwargs):
 		''' If title is empty, try to get a title from the page
@@ -118,15 +121,15 @@ class InterfaceFile(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	profile = models.ForeignKey('Profile',null=False,blank=False,on_delete=models.CASCADE)
 	file_name = models.CharField(max_length=500,null=True,blank=True)
-	file_type = models.CharField(max_length=1, null=False,blank=False)
+	file_type = models.CharField(max_length=1, null=False,blank=False) # 'I'mport or 'E'xport
 	text = models.TextField(null=False,blank=True)
-	file_format = models.CharField(max_length=1,null=False,blank=False, choices = IMPORT_TYPE_CHOICES)
+	file_format = models.CharField(max_length=1,null=False,blank=False, choices = IMPORT_FORMAT_CHOICES)
 	status = models.CharField(max_length=1,null=False,blank=False,default='N', choices = IMPORT_STATUS_CHOICES)
 
 	@property
 	def file_format_label(self):
 		try:
-			return dict(IMPORT_TYPE_CHOICES)[self.file_format]
+			return dict(IMPORT_FORMAT_CHOICES)[self.file_format]
 		except KeyError:
 			return self.file_format
 

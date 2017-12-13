@@ -6,7 +6,8 @@ from rest_framework import serializers
 from rest_framework.fields import empty
 
 from .models import Link, Profile
-from .utils import get_title, check_duplicate_link, get_profile, test_link
+from .utils import  get_profile, test_link
+from .link_utils import get_title, check_duplicate_link
 
 class TitleCharField(serializers.CharField):
 
