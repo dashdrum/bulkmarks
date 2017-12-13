@@ -39,9 +39,9 @@ class LinkForm(ModelForm):
 		super(LinkForm, self).__init__(*args, **kwargs)
 		##  Setting field attributes in __init__ avoids having to specify the field type, uses default
 		self.fields['tags'].required=False
-
-	title = CharField(required=False)
-	comment = CharField(required=False,widget=Textarea(attrs={'rows': '3'}))
+		self.fields['title'].required=False
+		self.fields['comment'].required=False
+		self.fields['comment'].widget=Textarea(attrs={'rows': '3'})
 
 	def clean(self):
 
@@ -57,7 +57,7 @@ class LinkForm(ModelForm):
 				title, error_code = get_title(url)
 
 		if not title:
-			raise ValidationError('Title is required')
+			self.add_error('title',ValidationError('Title is required', code='no_title'))
 
 		cleaned_data['title'] = title
 

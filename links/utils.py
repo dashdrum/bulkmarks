@@ -3,6 +3,9 @@
 from datetime import datetime
 
 from django.utils.timezone import make_aware, utc
+from annoying.functions import get_object_or_None
+
+from .models import Profile, Link
 
 
 def get_profile(user):
@@ -10,7 +13,7 @@ def get_profile(user):
 		profile = Profile.objects.get(user = user)
 		return profile
 	except:
-		profile = Profile(user=user,display_name=user.username,email=user.email)
+		profile = Profile(user=user,display_name=user.username)
 		profile.save()
 		return profile
 

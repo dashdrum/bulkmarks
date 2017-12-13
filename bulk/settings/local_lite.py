@@ -3,7 +3,7 @@
 from .settings import *
 
 
-DEBUG = True
+# DEBUG = True
 
 # Database
 DATABASES = {

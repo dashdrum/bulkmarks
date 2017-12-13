@@ -31,24 +31,24 @@ from taggit.managers import TaggableManager
 from taggit.models import CommonGenericTaggedItemBase, TaggedItemBase
 
 class GenericUUIDTaggedItem(CommonGenericTaggedItemBase, TaggedItemBase):
-    object_id = models.UUIDField(verbose_name='Object id', db_index=True)
+	object_id = models.UUIDField(verbose_name='Object id', db_index=True)
 
 #-----------------------------------------------------------------------------#
 
 class LinkSearchManager(models.Manager):
-    def search(self, search_terms):
-        terms = [term.strip() for term in search_terms.split()]
-        q_objects = []
+	def search(self, search_terms):
+		terms = [term.strip() for term in search_terms.split()]
+		q_objects = []
 
-        for term in terms:
-            q_objects.append(Q(title__icontains=term))
-            q_objects.append(Q(comment__icontains=term))
+		for term in terms:
+			q_objects.append(Q(title__icontains=term))
+			q_objects.append(Q(comment__icontains=term))
 
-        # Start with a bare QuerySet
-        qs = self.get_queryset()
+		# Start with a bare QuerySet
+		qs = self.get_queryset()
 
-        # Use operator's or_ to string together all of your Q objects.
-        return qs.filter(reduce(operator.or_, q_objects))
+		# Use operator's or_ to string together all of your Q objects.
+		return qs.filter(reduce(operator.or_, q_objects))
 
 class Link(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -78,6 +78,9 @@ class Link(ModelBase):
 
 	def __str__(self):
 		return self.title
+
+	def get_absolute_url(self):
+		return reverse('linkdetail', args=[str(self.id)])
 
 	def save(self,*args, **kwargs):
 		''' If title is empty, try to get a title from the page

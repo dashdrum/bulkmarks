@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 from django.utils.timezone import make_aware, utc
 from django.utils.html import escape
 from django.db import IntegrityError
+from django.db import transaction
 from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 
 from braces.views import SuccessURLRedirectListMixin
@@ -225,7 +226,8 @@ class LinkCreateView(LoginRequiredMixin, ProfileContext, CreateView):
 			# Save object and show success
 			self.object = form.save(commit=False)
 			self.object.profile = profile
-			self.object.save()
+			with transaction.atomic():
+				self.object.save()
 			form.save_m2m()
 			return HttpResponseRedirect(self.get_success_url())
 		except IntegrityError as e:
@@ -419,9 +421,9 @@ class VisitLinkView(SingleObjectMixin, ProfileContext, RedirectView):
 			if url:
 				return HttpResponseRedirect(url)
 			else:
-				return HttpResponseGone()
+				return HttpResponseGone()    ## Never
 		else:
-			return HttpResponseForbidden()
+			return HttpResponseForbidden()   ## Never
 
 	def get_redirect_url(self, *args, **kwargs):
 
