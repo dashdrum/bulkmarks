@@ -12,12 +12,15 @@ class IndexView(RedirectView):
 		return reverse('linksentry')
 
 class ErrorView(ProfileContext, TemplateView):
+	''' Inserts http status code into response '''
+
 	status = None
 
 	def render_to_response(self, context, **response_kwargs):
 		if self.status is None:
 			raise ImproperlyConfigured("ErrorView requires definition of status")
 
+		# # I don't know why this next line doesn't work
 		# return super(ErrorView,self).render_to_response(context,{'status': self.status})
 
 		response_kwargs.setdefault('content_type', self.content_type)
