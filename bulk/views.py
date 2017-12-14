@@ -1,6 +1,7 @@
 from django.views.generic import RedirectView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
+from django.core.exceptions import ImproperlyConfigured
 
 from links.views import ProfileContext
 
@@ -10,8 +11,29 @@ class IndexView(RedirectView):
 
 		return reverse('linksentry')
 
-class Error404View(ProfileContext, TemplateView):
-	template_name = '404.html'
+class ErrorView(ProfileContext, TemplateView):
+	status = None
 
-class Error500View(ProfileContext, TemplateView):
+	def render_to_response(self, context, **response_kwargs):
+		if self.status is None:
+			raise ImproperlyConfigured("ErrorView requires definition of status")
+
+		# return super(ErrorView,self).render_to_response(context,{'status': self.status})
+
+		response_kwargs.setdefault('content_type', self.content_type)
+		return self.response_class(
+			request=self.request,
+			template=self.get_template_names(),
+			context=context,
+			using=self.template_engine,
+			status=self.status,
+			**response_kwargs
+		)
+
+class Error404View(ErrorView):
+	template_name = '404.html'
+	status = 404
+
+class Error500View(ErrorView):
+	status=500
 	template_name = '500.html'
