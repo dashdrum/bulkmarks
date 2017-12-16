@@ -20,18 +20,7 @@ class ErrorView(ProfileContext, TemplateView):
 		if self.status is None:
 			raise ImproperlyConfigured("ErrorView requires definition of status")
 
-		# # I don't know why this next line doesn't work
-		# return super(ErrorView,self).render_to_response(context,{'status': self.status})
-
-		response_kwargs.setdefault('content_type', self.content_type)
-		return self.response_class(
-			request=self.request,
-			template=self.get_template_names(),
-			context=context,
-			using=self.template_engine,
-			status=self.status,
-			**response_kwargs
-		)
+		return super(ErrorView,self).render_to_response(context, status = self.status)
 
 class Error404View(ErrorView):
 	template_name = '404.html'
