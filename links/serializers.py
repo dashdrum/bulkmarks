@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 from rest_framework import serializers
 from rest_framework.fields import empty
+from rest_framework.fields import CurrentUserDefault
 
 from .models import Link, Profile
 from .utils import  get_profile, test_link
@@ -46,9 +47,16 @@ class LinkSerializer(serializers.ModelSerializer):
 
 		return value
 
+	def save(self):
+		user = self.context['request'].user
+		print('User:',user)
+		profile = get_profile(user)
+		print('Profile:', profile)
+		super(LinkSerializer,self).save()
+
 	class Meta:
 		model = Link
-		fields = ('id','title','url','comment','public','profile','status','tested_on')
+		fields = ('id','title','url','comment','public','status','tested_on')
 
 
 class AddURLLinkSerializer(LinkSerializer):

@@ -1,49 +1,36 @@
-<!doctype html>
-<!--
- This page is shown when the extension button is clicked, because the
- "browser_action" field in manifest.json contains the "default_popup" key with
- value "popup.html".
- -->
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Getting Started Extension's Popup</title>
-    <style type="text/css">
-      body {
-        margin: 10px;
-        white-space: nowrap;
-      }
-
-      h1 {
-        font-size: 15px;
-      }
-
-      #container {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-      }
-    </style>
-
-    <!--
-      - JavaScript and HTML must be in separate files: see our Content Security
-      - Policy documentation[1] for details and explanation.
-      -
-      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
-    -->
-    <script src="popup.js"></script>
-  </head>
-
-  <body>
-    <h1>Background Color Changer</h1>
-    <div id="container">
-      <span>Choose a color</span>
-      <select id="dropdown">
-        <option selected disabled hidden value=''></option>
-        <option value="white">White</option>
-        <option value="pink">Pink</option>
-        <option value="green">Green</option>
-        <option value="yellow">Yellow</option>
-      </select>
-    </div>
-  </body>
+    <head>
+        <style>
+            body { 
+                min-width: 420px; 
+                overflow-x: hidden; 
+                font-family: Arial, sans-serif; 
+                font-size: 12px; 
+            }
+            input, textarea { 
+                width: 420px; 
+            }
+            input#save { 
+                font-weight: bold; width: auto; 
+            }
+        </style>
+        <script src="popup.js"></script>
+    </head>
+    <body>
+        <form id="addbookmark">
+            <p><label for="title">Title</label><br />
+            <input type="text" id="title" name="title" size="50" value="" /></p>
+            <p><label for="url">Url</label><br />
+            <input type="text" id="url" name="url" size="50" value="" /></p>
+            <p><label for="summary">Summary</label><br />
+            <textarea id="summary" name="summary" rows="6" cols="35"></textarea></p>
+            <p><label for="tags">Tags</label><br />
+            <input type="text" id="tags" name="tags" size="50" value="" /></p>
+            <p>
+                <input id="save" type="submit" value="Save Bookmark" />
+                <span id="status-display"></span>
+            </p>
+        </form>
+    </body>
 </html>

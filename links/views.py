@@ -562,6 +562,8 @@ class AddURLViewSet(viewsets.ModelViewSet):
 	queryset = Link.objects.all().order_by('-created_on')
 	serializer_class = LinkSerializer
 
+	# ## Test with: curl -v --data-ascii "url=https://my.nmc.edu&title=My NMC" http://localhost:8000/l/api/links/
+
 
 
 class TestLinkAPIView(ProfileCheckMixin,UpdateAPIView):

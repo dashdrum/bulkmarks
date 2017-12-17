@@ -1,126 +1,75 @@
-// Copyright (c) 2014 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// This callback function is called when the content script has been 
+// injected and returned its results
+function onPageDetailsReceived(pageDetails)  { 
+    document.getElementById('title').value = pageDetails.title; 
+    document.getElementById('url').value = pageDetails.url; 
+    document.getElementById('summary').innerText = pageDetails.summary; 
+} 
 
-/**
- * Get the current URL.
- *
- * @param {function(string)} callback called when the URL of the current tab
- *   is found.
- */
-function getCurrentTabUrl(callback) {
-  // Query filter to be passed to chrome.tabs.query - see
-  // https://developer.chrome.com/extensions/tabs#method-query
-  var queryInfo = {
-    active: true,
-    currentWindow: true
-  };
+// Global reference to the status display SPAN
+var statusDisplay = null;
 
-  chrome.tabs.query(queryInfo, (tabs) => {
-    // chrome.tabs.query invokes the callback with a list of tabs that match the
-    // query. When the popup is opened, there is certainly a window and at least
-    // one tab, so we can safely assume that |tabs| is a non-empty array.
-    // A window can only have one active tab at a time, so the array consists of
-    // exactly one tab.
-    var tab = tabs[0];
+// POST the data to the server using XMLHttpRequest
+function addBookmark() {
+    // Cancel the form submit
+    event.preventDefault();
 
-    // A tab is a plain object that provides information about the tab.
-    // See https://developer.chrome.com/extensions/tabs#type-Tab
-    var url = tab.url;
+    // The URL to POST our data to
+    var postUrl = 'http://post-test.local.com';
 
-    // tab.url is only available if the "activeTab" permission is declared.
-    // If you want to see the URL of other tabs (e.g. after removing active:true
-    // from |queryInfo|), then the "tabs" permission is required to see their
-    // "url" properties.
-    console.assert(typeof url == 'string', 'tab.url should be a string');
+    // Set up an asynchronous AJAX POST request
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', postUrl, true);
+    
+    // Prepare the data to be POSTed by URLEncoding each field's contents
+    var title = encodeURIComponent(document.getElementById('title').value);
+    var url = encodeURIComponent(document.getElementById('url').value);
+    var summary = encodeURIComponent(document.getElementById('summary').value);
+    var tags = encodeURIComponent(document.getElementById('tags').value);
+    
+    var params = 'title=' + title + 
+                 '&url=' + url + 
+                 '&summary=' + summary +
+                 '&tags=' + tags;
+    
+    // Replace any instances of the URLEncoded space char with +
+    params = params.replace(/%20/g, '+');
 
-    callback(url);
-  });
+    // Set correct header for form data 
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 
-  // Most methods of the Chrome extension APIs are asynchronous. This means that
-  // you CANNOT do something like this:
-  //
-  // var url;
-  // chrome.tabs.query(queryInfo, (tabs) => {
-  //   url = tabs[0].url;
-  // });
-  // alert(url); // Shows "undefined", because chrome.tabs.query is async.
+    // Handle request state change events
+    xhr.onreadystatechange = function() { 
+        // If the request completed
+        if (xhr.readyState == 4) {
+            statusDisplay.innerHTML = '';
+            if (xhr.status == 200) {
+                // If it was a success, close the popup after a short delay
+                statusDisplay.innerHTML = 'Saved!';
+                window.setTimeout(window.close, 1000);
+            } else {
+                // Show what went wrong
+                statusDisplay.innerHTML = 'Error saving: ' + xhr.statusText;
+            }
+        }
+    };
+
+    // Send the request and set status
+    xhr.send(params);
+    statusDisplay.innerHTML = 'Saving...';
 }
 
-/**
- * Change the background color of the current page.
- *
- * @param {string} color The new background color.
- */
-function changeBackgroundColor(color) {
-  var script = 'document.body.style.backgroundColor="' + color + '";';
-  // See https://developer.chrome.com/extensions/tabs#method-executeScript.
-  // chrome.tabs.executeScript allows us to programmatically inject JavaScript
-  // into a page. Since we omit the optional first argument "tabId", the script
-  // is inserted into the active tab of the current window, which serves as the
-  // default.
-  chrome.tabs.executeScript({
-    code: script
-  });
-}
-
-/**
- * Gets the saved background color for url.
- *
- * @param {string} url URL whose background color is to be retrieved.
- * @param {function(string)} callback called with the saved background color for
- *     the given url on success, or a falsy value if no color is retrieved.
- */
-function getSavedBackgroundColor(url, callback) {
-  // See https://developer.chrome.com/apps/storage#type-StorageArea. We check
-  // for chrome.runtime.lastError to ensure correctness even when the API call
-  // fails.
-  chrome.storage.sync.get(url, (items) => {
-    callback(chrome.runtime.lastError ? null : items[url]);
-  });
-}
-
-/**
- * Sets the given background color for url.
- *
- * @param {string} url URL for which background color is to be saved.
- * @param {string} color The background color to be saved.
- */
-function saveBackgroundColor(url, color) {
-  var items = {};
-  items[url] = color;
-  // See https://developer.chrome.com/apps/storage#type-StorageArea. We omit the
-  // optional callback since we don't need to perform any action once the
-  // background color is saved.
-  chrome.storage.sync.set(items);
-}
-
-// This extension loads the saved background color for the current tab if one
-// exists. The user can select a new background color from the dropdown for the
-// current page, and it will be saved as part of the extension's isolated
-// storage. The chrome.storage API is used for this purpose. This is different
-// from the window.localStorage API, which is synchronous and stores data bound
-// to a document's origin. Also, using chrome.storage.sync instead of
-// chrome.storage.local allows the extension data to be synced across multiple
-// user devices.
-document.addEventListener('DOMContentLoaded', () => {
-  getCurrentTabUrl((url) => {
-    var dropdown = document.getElementById('dropdown');
-
-    // Load the saved background color for this page and modify the dropdown
-    // value, if needed.
-    getSavedBackgroundColor(url, (savedColor) => {
-      if (savedColor) {
-        changeBackgroundColor(savedColor);
-        dropdown.value = savedColor;
-      }
+// When the popup HTML has loaded
+window.addEventListener('load', function(evt) {
+    // Cache a reference to the status display SPAN
+    statusDisplay = document.getElementById('status-display');
+    // Handle the bookmark form submit event with our addBookmark function
+    document.getElementById('addbookmark').addEventListener('submit', addBookmark);
+    // Get the event page
+    chrome.runtime.getBackgroundPage(function(eventPage) {
+        // Call the getPageInfo function in the event page, passing in 
+        // our onPageDetailsReceived function as the callback. This injects 
+        // content.js into the current tab's HTML
+        eventPage.getPageDetails(onPageDetailsReceived);
     });
-
-    // Ensure the background color is changed and saved when the dropdown
-    // selection changes.
-    dropdown.addEventListener('change', () => {
-      changeBackgroundColor(dropdown.value);
-      saveBackgroundColor(url, dropdown.value);
-    });
-  });
 });
