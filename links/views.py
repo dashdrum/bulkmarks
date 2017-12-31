@@ -550,8 +550,8 @@ class AddURLAPIView(CreateAPIView):
 	''' Creates a new link row with the given URL '''
 
 	queryset = Link.objects.all()
-	serializer_class = AddURLLinkSerializer
-	# permission_classes = (IsAuthenticated,)
+	serializer_class = LinkSerializer
+	authentication_classes = []
 
 	# 	## Test with: curl -v --data-ascii url="http://nmc.edu" http://localhost:8000/l/api/addurl/
 

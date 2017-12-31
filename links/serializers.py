@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.models import User
+from django.shortcuts import render, get_object_or_404
 
 from rest_framework import serializers
 from rest_framework.fields import empty
@@ -48,15 +49,20 @@ class LinkSerializer(serializers.ModelSerializer):
 		return value
 
 	def save(self):
+		print('request.user:',self.context['request'].user)
 		user = self.context['request'].user
-		print('User:',user)
+		# user = get_object_or_404(User,username='dan')
+		print('LinkSerializer User:',user)
 		profile = get_profile(user)
-		print('Profile:', profile)
+		print('LinkSerializer Profile:', profile)
+		self.validated_data['profile'] = profile
+		self.validated_data['public'] = profile.public_default
+		print(self.validated_data)
 		super(LinkSerializer,self).save()
 
 	class Meta:
 		model = Link
-		fields = ('id','title','url','comment','public','status','tested_on')
+		fields = ('id','title','url','comment','public','status','tested_on', )
 
 
 class AddURLLinkSerializer(LinkSerializer):
@@ -67,9 +73,11 @@ class AddURLLinkSerializer(LinkSerializer):
 
 		url = data['url']
 
-		# user = self.request.user
-		user = User.objects.get(username='dgentry')
+		user = self.request.user
+		# user = User.objects.get(username='dgentry')
 		profile = get_profile(user)
+
+		print("AddURLLinkSerializer Profile:", profile)
 
 		data['profile'] = profile
 

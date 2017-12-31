@@ -7,10 +7,11 @@
 		<!-- Application CSS -->
 
 
-	{% endblock css_shared %}
+{% endblock css_shared %}
 
 {% block js.shared %}
 {{ block.super }}
+<script type="text/javascript" src="{% static 'bulk/js/app.js' %}"></script>
 {% endblock js.shared %}
 
 {% block title %}Bulk{% endblock title %}

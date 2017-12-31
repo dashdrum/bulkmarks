@@ -22,13 +22,13 @@ DEBUG = bool(environ.get('DJANGO_DEBUG', False))
 SECRET_KEY = environ.get('DJANGO_SECRET_KEY',None)
 
 if DEBUG and not SECRET_KEY:
-    SECRET_KEY = 'o-jhxtt-7f&$x6*yb8=cexcrn=3w0p(^7g3t%gl6tt*1d8ze5h'
+	SECRET_KEY = 'o-jhxtt-7f&$x6*yb8=cexcrn=3w0p(^7g3t%gl6tt*1d8ze5h'
 
 ALLOWED_HOSTS = environ.get('DJANGO_ALLOWED_HOSTS',[])
 if ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ALLOWED_HOSTS.split(',')
+	ALLOWED_HOSTS = ALLOWED_HOSTS.split(',')
 else:
-    ALLOWED_HOSTS = ['*']
+	ALLOWED_HOSTS = ['*']
 
 ##INTERNAL_IPS = ('127.0.0.1',)
 
@@ -44,48 +44,48 @@ SESSION_SAVE_EVERY_REQUEST = True
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+	'django.contrib.admin',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
 
-    'rest_framework',
-    'widget_tweaks',
-    'taggit',
+	'rest_framework',
+	'widget_tweaks',
+	'taggit',
 
-    'links',
-    'marketing',
-    'bulk',
+	'links',
+	'marketing',
+	'bulk',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'django.middleware.security.SecurityMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'bulk.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [join(BASE_DIR, 'bulk/templates').replace ('\\','/'),],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
+	{
+		'BACKEND': 'django.template.backends.django.DjangoTemplates',
+		'DIRS': [join(BASE_DIR, 'bulk/templates').replace ('\\','/'),],
+		'APP_DIRS': True,
+		'OPTIONS': {
+			'context_processors': [
+				'django.template.context_processors.debug',
+				'django.template.context_processors.request',
+				'django.contrib.auth.context_processors.auth',
+				'django.contrib.messages.context_processors.messages',
+			],
+		},
+	},
 ]
 
 WSGI_APPLICATION = 'bulk.wsgi.application'
@@ -132,13 +132,13 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
-    join(BASE_DIR, "bulk/static"),
+	join(BASE_DIR, "bulk/static"),
 )
 
 if DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+	STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 else:
-    STATIC_ROOT = environ['DJANGO_STATIC_ROOT']
+	STATIC_ROOT = environ['DJANGO_STATIC_ROOT']
 
 ## Whitenoise - Insert in 2nd place after SecurityMiddleware
 
@@ -147,17 +147,20 @@ MIDDLEWARE.insert(1,'whitenoise.middleware.WhiteNoiseMiddleware')
 # Add app before django.contrib.staticfiles to enable Whitenoise in development
 
 for i, app in enumerate(INSTALLED_APPS):
-    if app == 'django.contrib.staticfiles':
-        insert_point = i
+	if app == 'django.contrib.staticfiles':
+		insert_point = i
 INSTALLED_APPS.insert(insert_point,'whitenoise.runserver_nostatic')
 
 # DRF Settings
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_PERMISSION_CLASSES': (
-    #     'links.permissions.DjangoViewModelPermissions',
-    # ),
-    'DEFAULT_PERMISSION_CLASSES': [],
+	'DEFAULT_PERMISSION_CLASSES': (
+		'rest_framework.permissions.AllowAny',
+),
+	'DEFAULT_AUTHENTICATION_CLASSES': (
+		# 'rest_framework.authentication.BasicAuthentication',
+		'rest_framework.authentication.SessionAuthentication',
+	)
 
 }
 
@@ -175,13 +178,13 @@ USE_CELERY = False
 INSTALLED_APPS += ('heartbeat',)
 
 if 'heartbeat' in INSTALLED_APPS:
-    HEARTBEAT = {
-      'package_name': 'bulk',
-      'checkers': [
-          'heartbeat.checkers.databases',  ## Will check the DB connection
-      ],
-      'auth': {'authorized_ips': ('127.0.0.1','10.0.0.0/8'),},
-    }
+	HEARTBEAT = {
+	  'package_name': 'bulk',
+	  'checkers': [
+		  'heartbeat.checkers.databases',  ## Will check the DB connection
+	  ],
+	  'auth': {'authorized_ips': ('127.0.0.1','10.0.0.0/8'),},
+	}
 
 #
 #-----------------------------------------------------------------------------#

@@ -18,11 +18,19 @@ from django.conf.urls import handler404, handler500
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.forms import PasswordChangeForm
-
+from django.views.generic import RedirectView
+from django.contrib.staticfiles.storage import staticfiles_storage
 
 from .views import IndexView, Error404View, Error500View
 
 urlpatterns = [
+	url(
+		r'^favicon.ico$',
+		RedirectView.as_view(
+			url=staticfiles_storage.url('favicon.ico'),
+			permanent=False),
+		name="favicon"
+	),
 	url(r'^a/', admin.site.urls),
 	url(r'^l/', include('links.urls')),
 	url(r'^m/', include('marketing.urls')),
