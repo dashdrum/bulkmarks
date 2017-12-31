@@ -97,6 +97,10 @@ class Link(ModelBase):
 	class Meta:
 		permissions = (('view_links', "Can view links"),)
 		unique_together = ('url','profile')
+		indexes = [
+            models.Index(fields=['profile', '-created_on']),
+            models.Index(fields=['-created_on']),
+        ]
 
 	class Admin:
 		pass
