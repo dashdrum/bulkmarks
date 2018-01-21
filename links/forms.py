@@ -36,16 +36,33 @@ class ProfileForm(ModelForm):
 class LinkForm(ModelForm):
 
 	def __init__(self, *args, **kwargs):
+
 		super(LinkForm, self).__init__(*args, **kwargs)
-		##  Setting field attributes in __init__ avoids having to specify the field type, uses default
+
+		##  Setting field attributes in __init__ avoids having to specify the field type
 		self.fields['tags'].required=False
 		self.fields['title'].required=False
 		self.fields['comment'].required=False
 		self.fields['comment'].widget=Textarea(attrs={'rows': '3'})
 
+	def _post_clean(self):
+		''' Be sure that the instance's validate_unique is run including the profile field '''
+		super(LinkForm,self)._post_clean()
+		try:
+			self.instance.validate_unique(exclude=None)
+		except ValidationError as e:
+			self._update_errors(e)
+
 	def clean(self):
 
+		## No need to add the field to the form
+		# self.fields['profile'] = ModelChoiceField(Profile.objects.all(),initial=self.profile)
+
 		cleaned_data = super(LinkForm, self).clean()
+
+		## No need to add profile to cleaned_data
+		# if self.profile:
+		# 	cleaned_data['profile'] = self.profile
 
 		title = cleaned_data.get('title',None)
 		url = cleaned_data.get('url',None)
@@ -65,7 +82,7 @@ class LinkForm(ModelForm):
 
 	class Meta:
 		model = Link
-		fields = ['title','url','comment','public','tags',]
+		fields = ['title','url','comment','public','tags']
 
 class ImportFileForm(Form):
 

@@ -18,6 +18,9 @@ from .factories import UserFactory, LinkFactory, ProfileFactory, InterfaceFileFa
 
 
 test_url = 'https://dashdrum.com'
+other_test_url = 'https://blog.dashdrum.com'
+fake_UUID = 'FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF'
+
 
 
 class LinkTestCase(TestCase):
@@ -95,7 +98,7 @@ class TestVisitLinkView(LinkTestCase):
 
 	def test_404(self):
 		# Use validly formatted UUID that is not in the DB
-		response = self.client.get(reverse('linkvisit', kwargs={'pk': '77f0ce70-d9fb-4086-a342-acfdfdcafe10'}))
+		response = self.client.get(reverse('linkvisit', kwargs={'pk': fake_UUID}))
 		self.assertEqual(response.status_code, 404)
 
 	def test_test_link(self):
@@ -159,7 +162,7 @@ class TestLinkDetail(LinkTestCase):
 
 	def test_not_found(self):
 		login = self.client.login(username=self.normal_user.username,password='!')
-		response = self.client.get(reverse('linkdetail', kwargs={'pk': '77f0ce70-d9fb-4086-a342-acfdfdcafe10'}))
+		response = self.client.get(reverse('linkdetail', kwargs={'pk': fake_UUID}))
 		self.assertEqual(response.status_code, 404)
 
 	def test_unauthenticated_user(self):
@@ -216,7 +219,7 @@ class TestLinkCreate(LinkTestCase):
 							  'url': test_url,
 							  'comment': '',
 							  'public': '',
-							  'tages': '',
+							  'tags': '',
 							  })
 
 		self.assertEqual(response.status_code, 302)
@@ -240,6 +243,85 @@ class TestLinkCreate(LinkTestCase):
 
 		self.assertEqual(response.status_code, 200)
 		self.assertFormError(response, 'form', 'url', 'URL has already been saved')
+
+class TestLinkUpdate(LinkTestCase):
+
+	def test_not_found(self):
+		login = self.client.login(username=self.normal_user.username,password='!')
+		response = self.client.get(reverse('linkupdate', kwargs={'pk': fake_UUID}))
+		self.assertEqual(response.status_code, 404)
+
+	def test_unauthenticated_user(self):
+		l = LinkFactory.create(url=test_url,profile=self.normal_pro,status=None)
+		response = self.client.get(reverse('linkupdate', kwargs={'pk': l.pk}))
+		self.assertEqual(response.status_code, 302)
+		redirect_url = '/login/?next=' + reverse('linkupdate', kwargs={'pk': l.pk})
+		self.assertRedirects(response, redirect_url ,target_status_code=200)
+
+	def test_owner(self):
+		l = LinkFactory.create(url=test_url,profile=self.normal_pro,status=None)
+		login = self.client.login(username=self.normal_user.username,password='!')
+		response = self.client.get(reverse('linkupdate', kwargs={'pk': l.pk}))
+		self.assertEqual(response.status_code, 200)
+
+	def test_not_owner(self):
+		l = LinkFactory.create(url=test_url,profile=self.normal2_pro,status=None,public=False)
+		login = self.client.login(username=self.normal_user.username,password='!')
+		response = self.client.get(reverse('linkupdate', kwargs={'pk': l.pk}))
+		self.assertEqual(response.status_code, 404)
+
+	def test_successful_post(self):
+		l = LinkFactory.create(url=test_url,profile=self.normal_pro,status=None)
+		login = self.client.login(username=self.normal_user.username,password='!')
+
+		response = self.client.post(reverse('linkupdate', kwargs={'pk': l.pk}),
+							 {'title': 'New title',
+							  'url': l.url,
+							  'comment': 'New comment',
+							  'public': True,
+							  'tags': '',
+							  })
+
+		self.assertEqual(response.status_code, 302)
+		self.assertEqual(response['Location'], reverse('linkdetail', kwargs={'pk': l.pk}))
+
+		l = Link.objects.get(pk=l.pk)
+		self.assertEqual(l.title, 'New title')
+		self.assertEqual(l.comment, 'New comment')
+		self.assertEqual(l.public, True)
+
+	def test_unsuccessful_post(self):
+		l = LinkFactory.create(url=test_url,profile=self.normal_pro)
+		l2 = LinkFactory.create(url=other_test_url,profile=self.normal_pro)
+
+		login = self.client.login(username=self.normal_user.username,password='!')
+
+		response = self.client.post(reverse('linkupdate', kwargs={'pk': l.pk}),
+							 {'title': 'New title',
+							  'url': other_test_url,
+							  'comment': 'New comment',
+							  'public': True,
+							  'tags': '',
+							  })
+
+		self.assertEqual(response.status_code, 200)
+		self.assertFormError(response, 'form', '__all__', 'Link with this Url and Profile already exists.')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

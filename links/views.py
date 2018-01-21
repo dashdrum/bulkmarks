@@ -219,6 +219,7 @@ class LinkCreateView(LoginRequiredMixin, ProfileContext, CreateView):
 	def get_success_url(self):
 		return reverse('linksentry')
 
+	## override to inject the profile value - messy!
 	def form_valid(self, form):
 		user = self.request.user
 		profile = get_profile(user)
@@ -252,6 +253,19 @@ class LinkUpdateView(LoginRequiredMixin, ProfileContext, UpdateView):
 			return obj
 
 		raise Http404()
+
+	def get_form_kwargs(self):
+		''' Add profile to self.object before kwargs are populated '''
+
+		user = self.request.user
+		profile = get_profile(user)
+
+		if hasattr(self, 'object') and self.object and profile:
+				self.object.profile = profile
+
+		kwargs = super(LinkUpdateView, self).get_form_kwargs()
+
+		return kwargs
 
 
 class LinkDeleteView(LoginRequiredMixin, ProfileContext, SuccessURLRedirectListMixin, DeleteView):
