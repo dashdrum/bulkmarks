@@ -52,20 +52,23 @@ class TestProfileForm(LinkTestCase):
 class TestLinkForm(LinkTestCase):
 
 	def test_clean(self):
+		profile = ProfileFactory.create()
 		data={'title': '',
 			  'url': 'http://bulkmarks.com',
 			  'comment': '',
 			  'public': '',
-			  'tags': '',}
-		form = LinkForm(data=data)
+			  'tags': '',
+			  'profile': profile.pk,}
+		form = LinkForm(data=data,current_user_profile=profile)
 		self.assertTrue(form.is_valid())
 
 		data={'title': '',
 			  'url': 'http://nope.bulkmarks.com',
 			  'comment': '',
 			  'public': '',
-			  'tags': '',}
-		form = LinkForm(data=data)
+			  'tags': '',
+			  'profile': profile.pk,}
+		form = LinkForm(data=data,current_user_profile=ProfileFactory.create())
 		self.failIf(form.is_valid())
 		self.assertIn('Title is required',form.errors['title'])
 

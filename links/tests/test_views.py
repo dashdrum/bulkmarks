@@ -220,6 +220,7 @@ class TestLinkCreate(LinkTestCase):
 							  'comment': '',
 							  'public': '',
 							  'tags': '',
+							  'profile': self.normal_pro.pk,
 							  })
 
 		self.assertEqual(response.status_code, 302)
@@ -239,10 +240,11 @@ class TestLinkCreate(LinkTestCase):
 							  'comment': '',
 							  'public': '',
 							  'tags': '',
+							  'profile': self.normal_pro.pk,
 							  })
 
 		self.assertEqual(response.status_code, 200)
-		self.assertFormError(response, 'form', 'url', 'URL has already been saved')
+		self.assertFormError(response, 'form', '__all__', 'Link with this Url and Profile already exists.')
 
 class TestLinkUpdate(LinkTestCase):
 
@@ -280,6 +282,7 @@ class TestLinkUpdate(LinkTestCase):
 							  'comment': 'New comment',
 							  'public': True,
 							  'tags': '',
+							  'profile': self.normal_pro.pk,
 							  })
 
 		self.assertEqual(response.status_code, 302)
@@ -302,38 +305,26 @@ class TestLinkUpdate(LinkTestCase):
 							  'comment': 'New comment',
 							  'public': True,
 							  'tags': '',
+							  'profile': self.normal_pro.pk,
 							  })
 
 		self.assertEqual(response.status_code, 200)
 		self.assertFormError(response, 'form', '__all__', 'Link with this Url and Profile already exists.')
 
+	def test_profile_mismatch(self):
+		l = LinkFactory.create(url=test_url,profile=self.normal_pro)
+		l2 = LinkFactory.create(url=other_test_url,profile=self.normal_pro)
 
+		login = self.client.login(username=self.normal_user.username,password='!')
 
+		response = self.client.post(reverse('linkupdate', kwargs={'pk': l.pk}),
+							 {'title': 'New title',
+							  'url': other_test_url,
+							  'comment': 'New comment',
+							  'public': True,
+							  'tags': '',
+							  'profile': self.normal2_pro.pk,
+							  })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		self.assertEqual(response.status_code, 200)
+		self.assertFormError(response, 'form', '__all__', 'Web page altered. Try again.')

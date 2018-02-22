@@ -190,7 +190,17 @@ class LinkDetailView(LoginRequiredMixin, ProfileContext, DetailView):
 		raise Http404()
 
 
-class LinkCreateView(LoginRequiredMixin, ProfileContext, CreateView):
+class SendProfileToForm(object):
+	''' Mixin to add the current user profile to the form parameters '''
+
+	def get_form(self, form_class=None):
+
+		if form_class is None:
+			form_class = self.get_form_class()
+		return form_class(**self.get_form_kwargs(),current_user_profile=get_profile(self.request.user))
+
+
+class LinkCreateView(LoginRequiredMixin, SendProfileToForm, ProfileContext, CreateView):
 	model = Link
 	form_class = LinkForm
 
@@ -214,29 +224,17 @@ class LinkCreateView(LoginRequiredMixin, ProfileContext, CreateView):
 			self.initial['comment'] = add_link.comment
 			self.initial['tags'] = self.tags_as_string(add_link.tags)
 
+		user = self.request.user
+		profile = get_profile(user)
+
+		self.initial['profile'] = profile
+
 		return super(LinkCreateView,self).get_initial()
 
 	def get_success_url(self):
 		return reverse('linksentry')
 
-	## override to inject the profile value - messy!
-	def form_valid(self, form):
-		user = self.request.user
-		profile = get_profile(user)
-		try:
-			# Save object and show success
-			self.object = form.save(commit=False)
-			self.object.profile = profile
-			with transaction.atomic():
-				self.object.save()
-			form.save_m2m()
-			return HttpResponseRedirect(self.get_success_url())
-		except IntegrityError as e:
-			# Add the error to the form and send it back
-			form.add_error('url','URL has already been saved')
-			return self.render_to_response(self.get_context_data(form=form))
-
-class LinkUpdateView(LoginRequiredMixin, ProfileContext, UpdateView):
+class LinkUpdateView(LoginRequiredMixin, SendProfileToForm, ProfileContext, UpdateView):
 	model = Link
 	form_class = LinkForm
 
@@ -253,19 +251,6 @@ class LinkUpdateView(LoginRequiredMixin, ProfileContext, UpdateView):
 			return obj
 
 		raise Http404()
-
-	def get_form_kwargs(self):
-		''' Add profile to self.object before kwargs are populated '''
-
-		user = self.request.user
-		profile = get_profile(user)
-
-		if hasattr(self, 'object') and self.object and profile:
-				self.object.profile = profile
-
-		kwargs = super(LinkUpdateView, self).get_form_kwargs()
-
-		return kwargs
 
 
 class LinkDeleteView(LoginRequiredMixin, ProfileContext, SuccessURLRedirectListMixin, DeleteView):

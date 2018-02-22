@@ -37,6 +37,8 @@ class LinkForm(ModelForm):
 
 	def __init__(self, *args, **kwargs):
 
+		self.current_user_profile = kwargs.pop('current_user_profile')
+
 		super(LinkForm, self).__init__(*args, **kwargs)
 
 		##  Setting field attributes in __init__ avoids having to specify the field type
@@ -44,14 +46,16 @@ class LinkForm(ModelForm):
 		self.fields['title'].required=False
 		self.fields['comment'].required=False
 		self.fields['comment'].widget=Textarea(attrs={'rows': '3'})
+		self.fields['profile'].widget=HiddenInput()
 
-	def _post_clean(self):
-		''' Be sure that the instance's validate_unique is run including the profile field '''
-		super(LinkForm,self)._post_clean()
-		try:
-			self.instance.validate_unique(exclude=None)
-		except ValidationError as e:
-			self._update_errors(e)
+	def clean_profile(self):
+
+		profile = self.cleaned_data.get('profile',None)
+
+		if profile != self.current_user_profile:
+			self.add_error(None,ValidationError('Web page altered. Try again.', code='wrong_profile'))
+
+		return profile
 
 	def clean(self):
 
@@ -82,7 +86,7 @@ class LinkForm(ModelForm):
 
 	class Meta:
 		model = Link
-		fields = ['title','url','comment','public','tags']
+		fields = ['title','url','comment','public','tags','profile']
 
 class ImportFileForm(Form):
 
