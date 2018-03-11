@@ -3,7 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.core.exceptions import ImproperlyConfigured
 
-from links.views import ProfileContext
+from profiles.models import Profile
+from profiles.views import ProfileContext
 
 class IndexView(RedirectView):
 

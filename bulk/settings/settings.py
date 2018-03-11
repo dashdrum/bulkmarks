@@ -55,9 +55,10 @@ INSTALLED_APPS = [
 	'widget_tweaks',
 	'taggit',
 
-	'links',
+	'profiles',
 	'marketing',
 	'bulk',
+	'links',
 ]
 
 MIDDLEWARE = [

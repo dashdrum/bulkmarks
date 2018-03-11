@@ -28,26 +28,18 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView, UpdateAPIView
 
-from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
-from .models import Link, Profile, InterfaceFile
+from .models import Link, InterfaceFile
+from profiles.models import  Profile
 from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm, DeleteUserLinksInputForm,
-					SearchInputForm, TagInputForm, ProfileForm, )
-from .utils import get_profile, test_link
+					SearchInputForm, TagInputForm,  )
+from .utils import test_link
+from profiles.utils import get_profile
 from .link_utils import get_title
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, delete_user_links )
 from .messages import messages
-
-class ProfileContext(object):
-
-	def get_context_data(self, **kwargs):
-
-		context = super(ProfileContext,self).get_context_data(**kwargs)
-
-		if self.request.user.is_authenticated:
-			context['profile'] = get_profile(self.request.user)
-
-		return context
+from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
+from profiles.views import ProfileContext
 
 class LinkListView(ProfileContext, FormMixin, ListView):
 	model = Link
@@ -268,26 +260,6 @@ class LinkDeleteView(LoginRequiredMixin, ProfileContext, SuccessURLRedirectListM
 			return obj
 
 		raise Http404()
-
-class ProfileDetailView(LoginRequiredMixin, ProfileContext, DetailView):
-	model = Profile
-
-class ProfileUpdateView(LoginRequiredMixin, ProfileContext, UpdateView):
-	model = Profile
-	form_class = ProfileForm
-
-	def get_success_url(self):
-		return reverse('profiledetail' , kwargs={'pk': self.object.id })
-
-	def get_initial(self):
-
-		initial = super(ProfileUpdateView,self).get_initial()
-
-		initial['first_name'] = self.object.user.first_name
-		initial['last_name'] = self.object.user.last_name
-		initial['email'] = self.object.user.email
-
-		return initial
 
 class UploadImportFileTemplateView(LoginRequiredMixin, ProfileContext, FormView):
 
