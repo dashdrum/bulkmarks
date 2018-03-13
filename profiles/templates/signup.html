@@ -2,6 +2,7 @@
 
 {% block content %}
   <h2>Sign up</h2>
+  <p>Fill out the following fields and press Sign Up to register for Bulkmarks</p>
   <form method="post">
     {% csrf_token %}
     {% for field in form %}
