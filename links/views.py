@@ -207,6 +207,7 @@ class LinkCreateView(LoginRequiredMixin, SendProfileToForm, ProfileContext, Crea
 		return ', '.join(sorted(names))
 
 	def get_initial(self):
+		self.initial = {}  ## Don't know why I have to do this. Old data was hanging around
 		pk = self.kwargs.get('pk',None)
 		if pk:
 			add_link = get_object_or_404(Link,pk=pk)
