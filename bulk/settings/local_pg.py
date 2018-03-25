@@ -48,3 +48,10 @@ DEBUG_TOOLBAR_CONFIG = {
 ## end Django Debug Toolbar settings
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+
+## django-postgres-metrics settings
+
+if DEBUG:
+    INSTALLED_APPS.insert(0,'postgres_metrics.apps.PostgresMetrics')
