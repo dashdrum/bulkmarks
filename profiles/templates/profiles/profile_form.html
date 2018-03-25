@@ -1,4 +1,4 @@
-{% extends "links_base.html" %}
+{% extends "profiles_base.html" %}
 
 {% load widget_tweaks %}
 
@@ -22,6 +22,9 @@
 				<div class="form-group{% if field.errors %} has-error{% endif %}">
 			        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
 			        {% render_field field class="form-control" %}
+			        {% if field.help_text %}
+			          <small style="color: grey">{{ field.help_text }}</small>
+			        {% endif %}
 			        {% for error in field.errors %}
 			          <p class="help-block">{{ error }}</p>
 			        {% endfor %}

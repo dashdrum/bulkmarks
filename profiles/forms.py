@@ -10,8 +10,8 @@ from .models import Profile
 
 class ProfileForm(ModelForm):
 
-	first_name = CharField(required=False)
-	last_name = CharField(required=False)
+	# first_name = CharField(required=False)
+	# last_name = CharField(required=False)
 	email = EmailField(required=True)
 
 	def save(self, commit=True):
@@ -20,8 +20,8 @@ class ProfileForm(ModelForm):
 
 		# Save User information
 		user = self.instance.user
-		user.first_name = self.cleaned_data.get('first_name',None)
-		user.last_name = self.cleaned_data.get('last_name',None)
+		# user.first_name = self.cleaned_data.get('first_name',None)
+		# user.last_name = self.cleaned_data.get('last_name',None)
 		user.email = self.cleaned_data.get('email',None)
 		user.save()
 
@@ -33,7 +33,19 @@ class ProfileForm(ModelForm):
 
 class SignUpForm(UserCreationForm):
 	email = EmailField(max_length=254, help_text='Enter a valid email address.')
+	display_name = CharField(max_length=200)
+
+	def clean_email(self):
+
+		email = self.cleaned_data.get('email',None)
+
+		try:
+			User.objects.get(email=email)
+		except User.DoesNotExist: # email is not already in use
+			return email
+
+		self.add_error('email',ValidationError('This email address is already in use.', code='email_in_use'))
 
 	class Meta:
 		model = User
-		fields = ('username', 'email', 'password1', 'password2', )
+		fields = ('username', 'password1', 'password2', 'display_name', 'email')

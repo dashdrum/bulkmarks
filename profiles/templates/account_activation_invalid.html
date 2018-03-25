@@ -1,5 +1,13 @@
-{% extends 'base.html' %}
+{% extends 'profiles_base.html' %}
+
+{% block title %}{{ block.super }} - Invalid Activation{% endblock title %}
 
 {% block content %}
   <p>The confirmation link was invalid, possibly because it has already been used.  Please start the registration process again.</p>
 {% endblock %}
+
+{% block nav_items %}{% endblock nav_items %}
+
+{% block user_items %}
+        <li><a href="{% url 'login' %}">Log In</a></li>
+{% endblock user_items %}

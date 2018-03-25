@@ -1,5 +1,13 @@
-{% extends 'base.html' %}
+{% extends 'profiles_base.html' %}
+
+{% block title %}{{ block.super }} - Activation Email Sent{% endblock title %}
 
 {% block content %}
   <p>Check your email for a message from Bulkmarks. Please confirm your email address to complete the registration. </p>
 {% endblock %}
+
+{% block nav_items %}{% endblock nav_items %}
+
+{% block user_items %}
+        <li><a href="{% url 'login' %}">Log In</a></li>
+{% endblock user_items %}

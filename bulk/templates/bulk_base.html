@@ -26,7 +26,9 @@
 		  <a href="#" name="profile" class="dropdown-toggle"  data-toggle="dropdown">Profile
 		  <span class="caret"></span></a>
 		  <ul class="dropdown-menu">
-		    <li><a href="{% url 'profileupdate' pk=profile.id %}">Edit Profile</a></li>
+		  	{% if profile %}
+		    	<li><a href="{% url 'profileupdate' pk=profile.id %}">Edit Profile</a></li>
+		    {% endif %}
 		    <li><a href="{% url 'password_change' %}">Change Password</a></li>
 		    <li><a href="{% url 'logout' %}">{{ user.get_username|upper }} Log Out</a></li>
 		  </ul>

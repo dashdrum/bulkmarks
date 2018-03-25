@@ -150,10 +150,17 @@
     {% endif %}
 
     {% if not user.is_authenticated %}
-      <div class="row">  <!-- Signup for invite -->
+      <div class="row">  <!-- Request invite -->
         <div class = "request-invite">
           <p>Want to use Bulkmarks? <br>Request an invitation today.</p>
           <a class="btn btn-primary" href="{% url 'signupquick' %}" role="button">Request Invite</a>
+        </div>
+      </div> <!-- row -->
+
+      <div class="row">  <!-- Signup for invite -->
+        <div class = "signup">
+          <p>Have an invitation? <br>Signup now!</p>
+          <a class="btn btn-primary" href="{% url 'signup' %}" role="button">Signup</a>
         </div>
       </div> <!-- row -->
     {% endif %}

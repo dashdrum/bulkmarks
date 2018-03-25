@@ -27,8 +27,10 @@ import uuid
 class Profile(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	user = models.OneToOneField(settings.AUTH_USER_MODEL,null=False,on_delete=models.CASCADE)
-	public_default = models.BooleanField(default=True) # default value for public field on link
-	acct_public = models.BooleanField(default=True)    # is account visible to others
+	public_default = models.BooleanField(default=True, # default value for public field on link
+		help_text='Should other users be able to view your links by default?' )
+	acct_public = models.BooleanField(default=True,    # is account visible to others
+		help_text='Should other users be able to see this account?' )
 	display_name = models.CharField(max_length=200,null=False,blank=False)
 	reg_email_confirmed = models.BooleanField(default=False)
 

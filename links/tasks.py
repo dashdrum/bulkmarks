@@ -11,7 +11,8 @@ from django.core.mail import send_mail
 from bulk.celery import app
 
 
-from .models import InterfaceFile, Link, Profile
+from .models import InterfaceFile, Link
+from profiles.models import Profile
 from .utils import test_link
 
 

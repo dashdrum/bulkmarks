@@ -1,4 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'profiles_base.html' %}
+
+{% block title %}{{ block.super }} - Signup{% endblock title %}
 
 {% block content %}
   <h2>Sign up</h2>
@@ -20,3 +22,9 @@
     <button type="submit">Sign up</button>
   </form>
 {% endblock %}
+
+{% block nav_items %}{% endblock nav_items %}
+
+{% block user_items %}
+        <li><a href="{% url 'login' %}">Log In</a></li>
+{% endblock user_items %}
