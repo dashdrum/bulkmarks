@@ -47,4 +47,3 @@ DEBUG_TOOLBAR_CONFIG = {
 
 ## end Django Debug Toolbar settings
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

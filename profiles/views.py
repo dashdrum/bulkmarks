@@ -120,7 +120,7 @@ class SignupView(ProfileContext, FormView):
 				else:
 					send_activation_email(user,self.request)
 
-				return super(SignupView,self).form_valid(form)
+				return super(SignupView,self).form_valid(form) ## We can do better
 		except Exception as e:
 			print('SignupView.form_invalid()',type(e),e.args)
 

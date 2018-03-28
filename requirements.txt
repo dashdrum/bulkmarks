@@ -22,3 +22,5 @@ redis
 django-celery-results
 #django-celery-beat
 factory-boy
+sendgrid
+sendgrid-django

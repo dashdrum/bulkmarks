@@ -189,3 +189,13 @@ if 'heartbeat' in INSTALLED_APPS:
 
 #
 #-----------------------------------------------------------------------------#
+
+
+
+SENDGRID_API_KEY = environ.get('SENDGRID_API_KEY',None)
+
+if SENDGRID_API_KEY:
+	EMAIL_BACKEND = "sgbackend.SendGridBackend"
+else:
+	EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
