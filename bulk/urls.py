@@ -21,6 +21,8 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.views.generic import RedirectView
 from django.contrib.staticfiles.storage import staticfiles_storage
 
+from django.conf import settings
+
 from .views import IndexView, Error404View, Error500View
 
 urlpatterns = [
@@ -44,8 +46,6 @@ urlpatterns = [
 
 ###  Django Debug Toolbar
 
-from django.conf import settings
-
 if 'debug_toolbar' in settings.INSTALLED_APPS:
 	from debug_toolbar import urls as debug_urls
 	urlpatterns.append(url(r'^__debug__/',include(debug_urls)))
@@ -62,3 +62,8 @@ if 'heartbeat' in settings.INSTALLED_APPS:
 
 handler404 = Error404View.as_view()
 handler500 = Error500View.as_view()
+
+### django-postgres-metrics
+
+if 'postgres_metrics.apps.PostgresMetrics' in settings.INSTALLED_APPS:
+	urlpatterns.insert(0,url(r'^admin/postgres-metrics/', include('postgres_metrics.urls')))
