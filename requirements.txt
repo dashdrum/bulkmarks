@@ -23,5 +23,5 @@ django-celery-results
 #django-celery-beat
 factory-boy
 django-postgres-metrics
-sendgrid
+sendgrid>=3.6.5,<4
 sendgrid-django
