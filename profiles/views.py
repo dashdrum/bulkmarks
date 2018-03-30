@@ -3,7 +3,8 @@ from django.urls import reverse
 from django.contrib.auth.mixins import PermissionRequiredMixin,LoginRequiredMixin
 from django.contrib.auth import login
 from django.contrib.auth.models import User
-from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth.views import (PasswordChangeView, PasswordResetView, PasswordResetDoneView,
+										PasswordResetCompleteView, PasswordResetConfirmView, )
 from django.http import Http404
 
 from django.views.generic import (FormView, TemplateView, ListView, CreateView,
@@ -77,6 +78,18 @@ class ProfileUpdateView(LoginRequiredMixin, ProfileContext, UpdateView):
 		return initial
 
 class BulkPasswordChangeView(ProfileContext, PasswordChangeView):
+	pass
+
+class BulkPasswordResetView(ProfileContext, PasswordResetView):
+	pass
+
+class BulkPasswordResetDoneView(ProfileContext, PasswordResetDoneView):
+	pass
+
+class BulkPasswordResetCompleteView(ProfileContext, PasswordResetCompleteView):
+	pass
+
+class BulkPasswordResetConfirmView(ProfileContext, PasswordResetConfirmView):
 	pass
 
 class SignupView(ProfileContext, FormView):
