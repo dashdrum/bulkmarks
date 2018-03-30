@@ -51,6 +51,11 @@ DEBUG_TOOLBAR_CONFIG = {
 
 ## end Django Debug Toolbar settings
 
+## django-postgres-metrics settings
+
+if DEBUG:
+    INSTALLED_APPS.insert(0,'postgres_metrics.apps.PostgresMetrics')
+
 ''' Environment variables required
 
 	DJANGO_SECRET_KEY - 50 char random string
