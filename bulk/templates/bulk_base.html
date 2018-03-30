@@ -4,8 +4,7 @@
 {% block css_shared %}
 {{ block.super }}
 
-		<!-- Application CSS -->
-
+<link rel="stylesheet" href="{% static 'bulk/css/bulkmarks.css' %}">
 
 {% endblock css_shared %}
 
@@ -42,7 +41,9 @@
 {{block.super}}
 
 <a href="{% url 'index' %}" alt="Bulkmarks logo" title="BULKmarks Home">
-	<span id="page_title">BULKmarks</span>
+{% block headerimage %}
+<img src="{% static 'bulk/images/bulkmarks.png' %}" alt="Bulkmarks Logo"/>
+{% endblock headerimage %}
 </a>
 {% endblock contentheader %}
 
