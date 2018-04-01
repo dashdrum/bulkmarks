@@ -3,8 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.mixins import PermissionRequiredMixin,LoginRequiredMixin
 from django.contrib.auth import login
 from django.contrib.auth.models import User
-from django.contrib.auth.views import (PasswordChangeView, PasswordResetView, PasswordResetDoneView,
-										PasswordResetCompleteView, PasswordResetConfirmView, )
+from django.contrib.auth.views import PasswordChangeView
 from django.http import Http404
 
 from django.views.generic import (FormView, TemplateView, ListView, CreateView,
@@ -17,7 +16,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 
 from .models import Profile
-from .forms import (ProfileForm, SignUpForm)
+from .forms import (ProfileForm, RegistrationForm)
 from .utils import get_profile
 from .tokens import account_activation_token
 from .tasks import send_activation_email
@@ -80,21 +79,9 @@ class ProfileUpdateView(LoginRequiredMixin, ProfileContext, UpdateView):
 class BulkPasswordChangeView(ProfileContext, PasswordChangeView):
 	pass
 
-class BulkPasswordResetView(ProfileContext, PasswordResetView):
-	pass
-
-class BulkPasswordResetDoneView(ProfileContext, PasswordResetDoneView):
-	pass
-
-class BulkPasswordResetCompleteView(ProfileContext, PasswordResetCompleteView):
-	pass
-
-class BulkPasswordResetConfirmView(ProfileContext, PasswordResetConfirmView):
-	pass
-
-class SignupView(ProfileContext, FormView):
-	form_class = SignUpForm
-	template_name = 'signup.html'
+class RegistrationView(ProfileContext, FormView):
+	form_class = RegistrationForm
+	template_name = 'registration.html'
 
 	def form_valid(self,form):
 		user = form.save(commit=False)
@@ -115,7 +102,7 @@ class SignupView(ProfileContext, FormView):
 		else:
 			send_activation_email(user,self.request)
 
-		return super(SignupView,self).form_valid(form)
+		return super(RegistrationView,self).form_valid(form)
 
 	def form_invalid(self, form):
 		''' Catch username, email, and password match, resend '''
@@ -133,11 +120,11 @@ class SignupView(ProfileContext, FormView):
 				else:
 					send_activation_email(user,self.request)
 
-				return super(SignupView,self).form_valid(form) ## We can do better
+				return super(RegistrationView,self).form_valid(form) ## We can do better
 		except Exception as e:
 			print('SignupView.form_invalid()',type(e),e.args)
 
-		return super(SignupView,self).form_invalid(form)
+		return super(RegistrationView,self).form_invalid(form)
 
 	def get_success_url(self):
 		return reverse('account_activation_sent')

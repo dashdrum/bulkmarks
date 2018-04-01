@@ -2,7 +2,7 @@ from django.conf.urls import url, include
 from django.contrib.auth.views import (PasswordResetView, PasswordResetDoneView, PasswordResetCompleteView,
 									   PasswordResetConfirmView, )
 
-from .views import (ProfileDetailView, ProfileUpdateView, SignupView, AccountActivationSent, ActivateView,
+from .views import (ProfileDetailView, ProfileUpdateView, RegistrationView, AccountActivationSent, ActivateView,
 	                BulkPasswordChangeView,  )
 
 urlpatterns = [
@@ -25,7 +25,7 @@ urlpatterns = [
 		PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'), name='password_reset_confirm'),
 	url(r'^reset/done/$', PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
 
-    url(r'^signup/$', SignupView.as_view(), name='signup'),
+    url(r'^registration/$', RegistrationView.as_view(), name='registration'),
     url(r'^account_activation_sent/$', AccountActivationSent.as_view(), name='account_activation_sent'),
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         ActivateView.as_view(), name='activate'),

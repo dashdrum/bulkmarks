@@ -66,4 +66,5 @@ handler500 = Error500View.as_view()
 ### django-postgres-metrics
 
 if 'postgres_metrics.apps.PostgresMetrics' in settings.INSTALLED_APPS:
-	urlpatterns.insert(0,url(r'^admin/postgres-metrics/', include('postgres_metrics.urls')))
+	urlpatterns.insert(0,url(r'^a/postgres-metrics/', include('postgres_metrics.urls')))
+

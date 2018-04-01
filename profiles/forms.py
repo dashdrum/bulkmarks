@@ -31,7 +31,7 @@ class ProfileForm(ModelForm):
 		model = Profile
 		fields = ['display_name','acct_public','public_default']
 
-class SignUpForm(UserCreationForm):
+class RegistrationForm(UserCreationForm):
 	email = EmailField(max_length=254, help_text='Enter a valid email address.')
 	display_name = CharField(max_length=200)
 
