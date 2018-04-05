@@ -1,0 +1,39 @@
+{% extends 'bulk_base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{{ block.super }} - List{% endblock title %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-7 col-md-offset-1" id="config-container">
+
+    <dl id="config-list">
+      <table class="table table-bordered table-hover table-condensed" >
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Description</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for o in object_list %}
+          <tr>
+            <td><a href="{% url 'admin:bulk_configsetting_change' o.pk %}">{{o.config_code}}</a></td>
+            <td>{{o.config_description}}</td>
+            <td>{{o.config_value}}</td>
+          </tr>
+        {% endfor %} <!-- object-list -->
+       </tbody>
+
+  </div> <!-- link-container -->
+
+  <div class="col-md-4">
+
+  </div> <!-- col -->
+</div> <!-- row -->
+
+{% endblock content %}

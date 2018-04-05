@@ -23,7 +23,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 
 from django.conf import settings
 
-from .views import IndexView, Error404View, Error500View
+from .views import IndexView, Error404View, Error500View, ConfigSettingListView
 
 urlpatterns = [
 	url(
@@ -33,6 +33,7 @@ urlpatterns = [
 			permanent=False),
 		name="favicon"
 	),
+	url(r'^a/config/$', ConfigSettingListView.as_view(),name='configlist'),
 	url(r'^a/', admin.site.urls),
 	url(r'^p/', include('profiles.urls')),
 	url(r'^l/', include('links.urls')),

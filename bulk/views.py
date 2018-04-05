@@ -1,16 +1,19 @@
-from django.views.generic import RedirectView, TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import RedirectView, TemplateView, ListView
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.urls import reverse
 from django.core.exceptions import ImproperlyConfigured
 
 from profiles.models import Profile
 from profiles.views import ProfileContext
+from .models import ConfigSetting
 
 class IndexView(RedirectView):
 
 	def get_redirect_url(self, *args, **kwargs):
 
 		return reverse('linksentry')
+
+#-----------------------------------------------------------------------------#
 
 class ErrorView(ProfileContext, TemplateView):
 	''' Inserts http status code into response '''
@@ -30,3 +33,10 @@ class Error404View(ErrorView):
 class Error500View(ErrorView):
 	status=500
 	template_name = '500.html'
+
+#-----------------------------------------------------------------------------#
+
+class ConfigSettingListView(PermissionRequiredMixin, ListView):
+	model = ConfigSetting
+	permission_required = 'bulk.view_config_setting'
+
