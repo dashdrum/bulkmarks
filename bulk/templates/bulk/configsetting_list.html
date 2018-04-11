@@ -10,7 +10,7 @@
 <div class="row">
   <div class="col-md-7 col-md-offset-1" id="config-container">
 
-    <dl id="config-list">
+    <div id="config-list">
       <table class="table table-bordered table-hover table-condensed" >
         <thead>
           <tr>
@@ -22,17 +22,28 @@
         <tbody>
         {% for o in object_list %}
           <tr>
-            <td><a href="{% url 'admin:bulk_configsetting_change' o.pk %}">{{o.config_code}}</a></td>
+            <td>
+              {% if perms.bulk.change_configsetting or perms.bulk.delete_configsetting %}
+                <a href="{% url 'admin:bulk_configsetting_change' o.pk %}">{{o.config_code}}</a>
+              {% else %}
+                {{ o.config_code }}
+              {% endif %}
+            </td>
             <td>{{o.config_description}}</td>
             <td>{{o.config_value}}</td>
           </tr>
         {% endfor %} <!-- object-list -->
-       </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div> <!-- config-list -->
 
-  </div> <!-- link-container -->
+  </div> <!-- config-container -->
 
   <div class="col-md-4">
+
+    {% if perms.bulk.add_configsetting %}
+      <a href="{% url 'admin:bulk_configsetting_add' %}">Add New Config Setting</a>
+    {% endif %}
 
   </div> <!-- col -->
 </div> <!-- row -->

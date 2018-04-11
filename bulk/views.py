@@ -38,5 +38,5 @@ class Error500View(ErrorView):
 
 class ConfigSettingListView(PermissionRequiredMixin, ListView):
 	model = ConfigSetting
-	permission_required = 'bulk.view_config_setting'
+	permission_required = 'bulk.view_configsetting' ### <-- not working!!!!
 

@@ -17,7 +17,7 @@ class ConfigSetting(ModelBase):
 		return self.config_code + ' - ' + self.config_description
 
 	class Meta:
-		permissions = (('view_config_seting', "Can view configuration"),)
+		permissions = (('view_configsetting', "Can view configuration"),)
 		ordering = ['config_code']
 
 	class Admin:

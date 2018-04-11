@@ -11,7 +11,7 @@ djangorestframework
 git+http://github.com/dashdrum/dashdrum-django-snips.git#egg=dashdrum-django-snips
 -e git+http://github.com/dashdrum/django-heartbeat.git#egg=django-heartbeat
 gunicorn
-psycopg2
+psycopg2-binary
 urllib3
 whitenoise
 html5lib
