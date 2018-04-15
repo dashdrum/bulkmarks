@@ -13,6 +13,6 @@
 {% block nav_items %}
 {{ block.super }}
 {% if user.is_authenticated %}
-	<li><a href="{% url 'links' scope='user' %}">{{ user.get_username|upper }}'s Links</a></li>
+	<li class="nav-item"><a class="nav-link" href="{% url 'links' scope='user' %}">{{ user.get_username|upper }}'s Links</a></li>
 {% endif %}
 {% endblock nav_items %}

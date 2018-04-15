@@ -10,7 +10,7 @@
 {% block content %}
 <form action="." method="post" > {% csrf_token %}
 <div class="row">
-	<div id="linkInformation" class="col-md-10 col-md-offset-1">
+	<div id="linkInformation" class="col-md-10 offset-md-1">
 
 		<h1>Update Profile Information</h1>
 
@@ -36,7 +36,7 @@
 </div>
 
 <div class="row">
-	<div class="col-md-10 col-md-offset-1">
+	<div class="col-md-10 offset-md-1">
 		<div class="btn-toolbar text-right" aria-label="...">
 			<input   class="btn btn-default"  type=button value="Cancel" onClick="history.go(-1)" class="button" >
 			<input   class="btn btn-primary"  type="submit" value="Save" class="button"/>

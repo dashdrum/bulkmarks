@@ -16,7 +16,7 @@
 
 <form action="." method="post" > {% csrf_token %}
   <div class="row user-select"> <!-- Delete another user's links -->
-    <div class="col-md-5 col-md-offset-1">
+    <div class="col-md-5 offset-md-1">
           <div class="form-group{% if form.user_select.errors %} has-error{% endif %}">
                 <label for="{{ form.user_select.id_for_label }}">{{ form.user_select.label }}</label>
                 {% render_field form.user_select class="form-control" %}
@@ -28,7 +28,7 @@
   </div> <!-- row user-select -->
 
   <div class="row">
-    <div class="col-md-5 col-md-offset-1">
+    <div class="col-md-5 offset-md-1">
       <div class="btn-toolbar text-right" role="group" aria-label="...">
         <input   class="btn btn-default"  type=button value="Cancel" onClick="history.go(-1)" class="button" >
         <input   class="btn btn-primary"  type="submit" value="Delete Links" class="button"/>

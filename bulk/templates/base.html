@@ -15,10 +15,7 @@
 {% block css %}
 
 	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-
-	<!-- Optional theme -->
-	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 	{% block css_shared %}{% endblock css_shared %}
 	{% block css_custom %}{% endblock css_custom %}
@@ -27,10 +24,11 @@
 
 {% block js %}
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 
 	<!-- Latest compiled and minified JavaScript -->
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
     {% block js.shared %}{% endblock js.shared %}
     {% block js.custom %}{% endblock js.custom %}
@@ -43,30 +41,31 @@
 
 <div class="container-fluid" id="main">
 
-	<nav class="navbar navbar-default" role="navigation">
+<nav class="navbar navbar-light bg-light navbar-expand-md" role="navigation">
 		<div class="container" id="app-navbar">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
 				{% block contentheader %}{% endblock contentheader %}
-			</div><!-- /.navbar-header -->
-			<div class="navbar-collapse collapse" id="navbar-collapse-1">
-				<ul class="nav navbar-nav navbar-right">
+
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapse-1" aria-controls="navbar-collapse-1" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+		<div class="navbar-collapse collapse" id="navbar-collapse-1">
+            <ul class="navbar-nav ml-auto">
 					{% block nav_items %}
 						{% if user.is_staff %}
-							<li><a href="{% url 'admin:index' %}" title='Admin Dashboard' id='admin_button'>Admin</a></li>
+							<li class="nav-item">
+								<a class="nav-link" href="{% url 'admin:index' %}" title='Admin Dashboard' id='admin_button'>Admin</a>
+							</li>
 						{% endif %}
 						<!-- nav items here as <li> -->
 					{% endblock nav_items %}
 					{% block user_items %}
 						{% if user.is_authenticated %}
-			                <li><a href="{% url 'logout' %}">{{ user.get_username|upper }} Log Out</a></li>
+			                <li class="nav-item">
+			                	<a class="nav-link" href="{% url 'logout' %}">{{ user.get_username|upper }} Log Out</a>
+			                </li>
 			            {% else %}
-			                <li><a href="{% url 'login' %}">Log In</a></li>
+			                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Log In</a></li>
 			            {% endif %}
 			         {% endblock user_items %}
 

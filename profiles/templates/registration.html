@@ -3,24 +3,31 @@
 {% block title %}{{ block.super }} - Signup{% endblock title %}
 
 {% block content %}
-  <h2>Sign up</h2>
-  <p>Fill out the following fields and press Sign Up to register for Bulkmarks</p>
-  <form method="post">
-    {% csrf_token %}
-    {% for field in form %}
-      <p>
-        {{ field.label_tag }}<br>
-        {{ field }}
-        {% if field.help_text %}
-          <small style="color: grey">{{ field.help_text }}</small>
-        {% endif %}
-        {% for error in field.errors %}
-          <p style="color: red">{{ error }}</p>
-        {% endfor %}
-      </p>
-    {% endfor %}
-    <button type="submit">Sign up</button>
-  </form>
+<div class="row">
+  <div id="signupInfo" class="col-md-10 offset-md-1">
+    <h2>Register</h2>
+    <p>Fill out the following fields and press Register to register for Bulkmarks</p>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+        <p>
+          {{ field.label_tag }}<br>
+          {{ field }}
+          {% if field.help_text %}
+            <small style="color: grey">{{ field.help_text }}</small>
+          {% endif %}
+          {% for error in field.errors %}
+            <p style="color: red">{{ error }}</p>
+          {% endfor %}
+        </p>
+      {% endfor %}
+    <div class="btn-group" role="group" aria-label="...">
+      <input   class="btn btn-primary"  type="submit" value="Register" class="button"/>
+      <input   class="btn btn-secondary"  type=button value="Cancel" onClick="history.go(-1)" class="button" >
+    </div>
+    </form>
+  </div> <!-- col -->
+</div> <!-- row -->
 {% endblock %}
 
 {% block nav_items %}{% endblock nav_items %}

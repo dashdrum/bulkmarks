@@ -8,13 +8,13 @@
 {% block content %}
 <form action="." method="post" enctype="multipart/form-data"> {% csrf_token %}
 	<div class="row">
-		<div id="exportInfo" class="col-md-5 col-md-offset-1">
+		<div id="exportInfo" class="col-md-5 offset-md-1">
 			<p>Exporting links to: <span class="export-file-name">{{filename}}</span></p>
 		</div> <!-- col -->
 	</div> <!-- row -->
 
 	<div class="row">
-		<div class="col-md-5 col-md-offset-1">
+		<div class="col-md-5 offset-md-1">
 			<div class="btn-toolbar text-right" role="group" aria-label="...">
 				<input   class="btn btn-default"  type=button value="Cancel" onClick="history.go(-1)" class="button" >
 				<input   class="btn btn-primary"  type="submit" value="Export" class="button"/>

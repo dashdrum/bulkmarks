@@ -14,18 +14,18 @@
 {% block nav_items %}
 {{ block.super }}
 {% if user.is_authenticated %}
-    <li class="small-menu" style="display: none;"><a href="{% url 'links' scope='public' %}" title="Public Links">Public Links</a></li>
-    <li><a class="small-menu" href="#search" style="display: none;" title="Search">Search</a></li>
+    <li class="nav-item d-md-none" id="public-links-menu"><a class="nav-link" href="{% url 'links' scope='public' %}" title="Public Links">Public Links</a></li>
+    <li class="nav-item"><a class="nav-link" href="#search" style="display: none;" title="Search">Search</a></li>
 {% endif %}
 {% if not user.is_authenticated %}
-    <li class="small-menu" style="display: none;" ><a href="{% url 'signupquick' %}" title="Request Invite">Request Invite</a></li>
+    <li class="nav-item d-md-none" id="request-invite-menu"><a class="nav-link" href="{% url 'signupquick' %}" title="Request Invite">Request Invite</a></li>
 {% endif %}
 {% endblock nav_items %}
 
 {% block content %}
 
 <div class="row">
-  <div class="col-md-7 col-md-offset-1" id="link-container">
+  <div class="col-md-7 offset-md-1" id="link-container">
 
     {% if message %}
       <div id="message">
@@ -137,7 +137,7 @@
 
     {% if display_name %}
       <div class="row">
-        <div class = "link public-link"> <!-- show public links -->
+        <div class = "link public-link d-none d-md-block" > <!-- show public links -->
           <h3>Latest Public Links</h3>
           <p><a href="{% url 'links' scope='public' %}" title="View all public links">(view all)</a></p>
           <dl id="latest-public">
@@ -151,14 +151,14 @@
 
     {% if not user.is_authenticated %}
       <div class="row">  <!-- Request invite -->
-        <div class = "request-invite">
+        <div class = "request-invite d-none d-md-block">
           <p>Want to use Bulkmarks? <br>Request an invitation today.</p>
           <a class="btn btn-primary" href="{% url 'signupquick' %}" role="button">Request Invite</a>
         </div>
       </div> <!-- row -->
 
       <div class="row">  <!-- Signup for invite -->
-        <div class = "registration">
+        <div class = "registration  d-none d-md-block">
           <p>Have an invitation? <br>Register now!</p>
           <a class="btn btn-primary" href="{% url 'registration' %}" role="button">Register</a>
         </div>

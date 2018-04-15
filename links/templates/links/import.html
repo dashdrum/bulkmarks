@@ -10,7 +10,7 @@
 {% block content %}
 <form action="." method="post" enctype="multipart/form-data"> {% csrf_token %}
 <div class="row">
-	<div id="importInfo" class="col-md-10 col-md-offset-1">
+	<div id="importInfo" class="col-md-10 offset-md-1">
 
 		<span class='show_error'>{{ form.non_field_errors }}</span>
 
@@ -30,7 +30,7 @@
 </div>
 
 <div class="row">
-	<div class="col-md-10 col-md-offset-1">
+	<div class="col-md-10 offset-md-1">
 		<div class="btn-toolbar text-right" aria-label="...">
 			<input   class="btn btn-default"  type=button value="Cancel" onClick="history.go(-1)" class="button" >
 			<input   class="btn btn-primary"  type="submit" value="Import" class="button"/>

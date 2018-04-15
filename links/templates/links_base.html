@@ -10,12 +10,20 @@
 
 {% block title %}Bulkmarks{% endblock title %}
 
-{% block nav_items %}
+{% block user_items %}
+{% if user.is_authenticated %}
+	<li class="nav-item"><a class="nav-link" href="{% url 'links' scope='user' %}">{{ user.get_username|upper }}'s Links</a></li>
+	<li class="nav-item"><a class="nav-link" href="{% url 'linkcreate' %}">Add Link</a></li>
+{% endif %}
+{{ block.super }}
+{% endblock user_items %}
+
+
+
+{% block more_user_items %}
 {{ block.super }}
 {% if user.is_authenticated %}
-	<li><a href="{% url 'links' scope='user' %}">{{ user.get_username|upper }}'s Links</a></li>
-	<li><a href="{% url 'linkcreate' %}">Add Link</a></li>
-	<li><a href="{% url 'import' %}">Import</a></li>
-	<li><a href="{% url 'export' %}">Export</a></li>
+	<li class="dropdown-item"><a href="{% url 'import' %}">Import</a></li>
+	<li class="dropdown-item"><a href="{% url 'export' %}">Export</a></li>
 {% endif %}
-{% endblock nav_items %}
+{% endblock more_user_items %}

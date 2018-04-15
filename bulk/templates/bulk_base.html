@@ -21,26 +21,29 @@
 
 {% block user_items %}
 	{% if user.is_authenticated %}
-		<li>
-		  <a href="#" name="profile" class="dropdown-toggle"  data-toggle="dropdown">Profile
+		<li class="nav-item">
+		  <a href="#" name="profile" class="dropdown-toggle nav-link"  data-toggle="dropdown">Profile
 		  <span class="caret"></span></a>
 		  <ul class="dropdown-menu">
 		  	{% if profile %}
-		    	<li><a href="{% url 'profileupdate' pk=profile.id %}">Edit Profile</a></li>
+		    	<li class="dropdown-item"><a href="{% url 'profileupdate' pk=profile.id %}">Edit Profile</a></li>
 		    {% endif %}
-		    <li><a href="{% url 'password_change' %}">Change Password</a></li>
-		    <li><a href="{% url 'logout' %}">{{ user.get_username|upper }} Log Out</a></li>
+		    <li class="dropdown-item"><a href="{% url 'password_change' %}">Change Password</a></li>
+			{% block more_user_items %}{% endblock more_user_items %}
+            <li class="dropdown-item">
+            	<a href="{% url 'logout' %}">{{ user.get_username|upper }} Log Out</a>
+            </li>
 		  </ul>
 		</li>
 	{% else %}
-        <li><a href="{% url 'login' %}">Log In</a></li>
+		{{ block.super }}
     {% endif %}
 {% endblock user_items %}
 
 {% block contentheader %}
 {{block.super}}
 
-<a href="{% url 'index' %}" alt="Bulkmarks logo" title="BULKmarks Home">
+<a class="navbar-brand" href="{% url 'index' %}" alt="Bulkmarks logo" title="BULKmarks Home">
 {% block headerimage %}
 <img src="{% static 'bulk/images/bulkmarks.png' %}" alt="Bulkmarks Logo"/>
 {% endblock headerimage %}
