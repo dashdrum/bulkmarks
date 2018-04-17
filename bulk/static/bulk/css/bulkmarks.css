@@ -1,3 +1,27 @@
 
 h1, h2, h3 {color: black;}
 
+a {
+	color: #428bca;
+}
+
+.btn-primary {
+	color: #fff;
+	border-color: #245580;
+	background-image: linear-gradient(to bottom,#337ab7 0,#265a88 100%);
+}
+
+.logo {
+	max-width: 100%;
+	height: auto;
+}
+
+.navbar-brand {
+	max-width: 64%;
+}
+
+th {
+	color: #fff;
+	border-color: #245580;
+	background-image: linear-gradient(to bottom,#337ab7 0,#265a88 100%);
+}

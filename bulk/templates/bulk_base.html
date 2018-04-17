@@ -21,10 +21,10 @@
 
 {% block user_items %}
 	{% if user.is_authenticated %}
-		<li class="nav-item">
+		<li class="nav-item dropdown">
 		  <a href="#" name="profile" class="dropdown-toggle nav-link"  data-toggle="dropdown">Profile
 		  <span class="caret"></span></a>
-		  <ul class="dropdown-menu">
+		  <ul class="dropdown-menu dropdown-menu-right">
 		  	{% if profile %}
 		    	<li class="dropdown-item"><a href="{% url 'profileupdate' pk=profile.id %}">Edit Profile</a></li>
 		    {% endif %}
@@ -45,7 +45,7 @@
 
 <a class="navbar-brand" href="{% url 'index' %}" alt="Bulkmarks logo" title="BULKmarks Home">
 {% block headerimage %}
-<img src="{% static 'bulk/images/bulkmarks.png' %}" alt="Bulkmarks Logo"/>
+<img src="{% static 'bulk/images/bulkmarks.png' %}" alt="Bulkmarks Logo" class="logo"/>
 {% endblock headerimage %}
 </a>
 {% endblock contentheader %}
