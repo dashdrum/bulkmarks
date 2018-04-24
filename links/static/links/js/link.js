@@ -33,3 +33,10 @@ $("#modal-link").on("submit", ".js-link-add-form", function () {
     });
     return false;
   });
+
+
+
+/* Toggle search input display */
+$( "#search-sm-btn" ).click(function() {
+  $( "#search-sm" ).toggle(400);
+});

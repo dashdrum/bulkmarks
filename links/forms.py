@@ -98,10 +98,20 @@ class DeleteUserLinksInputForm(ActiveUserInputForm):
 		self.fields['user_select'].label='Delete another user\'s links'
 
 class SearchInputForm(Form):
+
+	def __init__(self, *args, **kwargs):
+		super(SearchInputForm, self).__init__(*args, **kwargs)
+		self.fields['searchparam'].widget.attrs.update({'placeholder': 'Search'})
+
 	scope = CharField(max_length=60,widget=HiddenInput()) # Arbitrary length for now
 	searchparam = CharField(max_length=200,label='Search') # Arbitrary length for now
 
 class TagInputForm(Form):
+
+	def __init__(self, *args, **kwargs):
+		super(TagInputForm, self).__init__(*args, **kwargs)
+		self.fields['searchtag'].widget.attrs.update({'placeholder': 'Tag Search'})
+
 	scope = CharField(max_length=60,widget=HiddenInput()) # Arbitrary length for now
 	searchtag = CharField(max_length=100,label='Tag Search') # Arbitrary length for now
 

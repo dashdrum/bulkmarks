@@ -443,13 +443,16 @@ class SearchLinkListView(LoginRequiredMixin,LinkListView):
 
 	def get(self, request, *args, **kwargs):
 		self.scope = kwargs.get('scope',None)
-		self.searchparam = kwargs.get('searchparam','')
+		self.searchparam = kwargs.get('searchparam',None)
 
 		return super(SearchLinkListView, self).get(request, *args, **kwargs)
 
 	def get_queryset(self):
 		self.profile = None
-		qs = self.add_scope(Link.search_objects.search(self.searchparam))
+		if self.searchparam:
+			qs = self.add_scope(Link.search_objects.search(self.searchparam))
+		else:
+			qs = self.add_scope(Link.objects.none())
 		qs = qs.select_related('profile').prefetch_related('profile__user')
 		self.queryset = qs
 		return super(LinkListView,self).get_queryset() # Super of LinkListView, not current class

@@ -1,0 +1,31 @@
+/* Style that search button */
+
+#search-sm-btn {
+  border-color: #cccccc;
+    padding: .25rem .75rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    color: rgba(0,0,0,.5);
+    border-color: rgba(0,0,0,.1);
+    height: 40px;
+    width: 56px;
+}
+
+#search-sm-btn:hover, #search-sm-btn:focus {
+	text-decoration: none;
+}
+
+.input-group>.input-group-append>.btn {
+	border-color: #cccccc;
+}
+
+
+/* Gotta round those corners */
+
+.input-group>.form-control:not(:first-child) {
+  border-top-left-radius: .25rem;
+  border-bottom-left-radius: .25rem;
+}

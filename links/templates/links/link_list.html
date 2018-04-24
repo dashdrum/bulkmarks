@@ -4,6 +4,10 @@
 
 {% load widget_tweaks %}
 
+{% block css_custom %}
+<link rel="stylesheet" href="{% static 'links/css/links.css' %}" >
+{% endblock css_custom %}
+
 {% block js.custom %}
 <script src="{% static 'links/js/jquery.waypoints.min.js' %}"></script>
 <script src="{% static 'links/js/shortcuts/infinite.min.js' %}"></script>
@@ -11,18 +15,52 @@
 
 {% block title %}{{ block.super }} - List{% endblock title %}
 
+{% block navbarform %}
+  {% if user.is_authenticated %}
+    <button class="searchBtn d-lg-none" id="search-sm-btn"><a href="#"><i class="fa fa-search"></i></a></button>
+  {% endif %}
+<div class="d-none d-lg-block">
+  {% if user.is_authenticated %}
+    <form class="navbar-form" role="search" action="{% url 'searchentry' %}" method="post">
+             {% csrf_token %}
+      <div class="input-group form-group{% if searchform.user_select.errors %} has-error{% endif %}">
+        {% render_field searchform.scope class="form-control" %}
+        {% render_field searchform.searchparam class="form-control" %}
+        <span class="input-group-append">
+          <button class="btn btn-default" type="submit"><i class="fas fa-search"></i></button>
+        </span>
+      </div>
+    </form>
+  {% endif %}
+</div>
+{% endblock navbarform %}
+
 {% block nav_items %}
 {{ block.super }}
 {% if user.is_authenticated %}
-    <li class="nav-item d-md-none" id="public-links-menu"><a class="nav-link" href="{% url 'links' scope='public' %}" title="Public Links">Public Links</a></li>
-    <li class="nav-item"><a class="nav-link" href="#search" style="display: none;" title="Search">Search</a></li>
+    <li class="nav-item d-lg-none" id="public-links-menu"><a class="nav-link" href="{% url 'links' scope='public' %}" title="Public Links">Public Links</a></li>
 {% endif %}
 {% if not user.is_authenticated %}
-    <li class="nav-item d-md-none" id="request-invite-menu"><a class="nav-link" href="{% url 'signupquick' %}" title="Request Invite">Request Invite</a></li>
+    <li class="nav-item d-lg-none" id="request-invite-menu"><a class="nav-link" href="{% url 'signupquick' %}" title="Request Invite">Request Invite</a></li>
 {% endif %}
 {% endblock nav_items %}
 
 {% block content %}
+
+<div class="d-lg-none" id="search-sm"  style="display: none">
+  {% if user.is_authenticated %}
+    <form role="search" action="{% url 'searchentry' %}" method="post">
+             {% csrf_token %}
+      <div class="input-group form-group{% if searchform.user_select.errors %} has-error{% endif %}">
+        {% render_field searchform.scope class="form-control" %}
+        {% render_field searchform.searchparam class="form-control" %}
+        <span class="input-group-append">
+          <button class="btn btn-default" type="submit"><i class="fas fa-search"></i></button>
+        </span>
+      </div>
+    </form>
+  {% endif %}
+</div>
 
 <div class="row">
   <div class="col-md-7 offset-md-1" id="link-container">
@@ -101,43 +139,26 @@
 
   <div class="col-md-4">
 
-    {% if user.is_authenticated %}
-      <div id="search_panel">
-        <form id="search_form" action="{% url 'searchentry' %}" method="post">
-           {% csrf_token %}
-              <div class="form-group{% if searchform.user_select.errors %} has-error{% endif %}">
-                {% render_field searchform.scope class="form-control" %}
-                <label for="{{ searchform.searchparam.id_for_label }}">{{ searchform.searchparam.label }}</label>
-                {% render_field searchform.searchparam class="form-control" %}
-                {% for error in searchform.user_select.errors %}
-                  <p class="help-block">{{ error }}</p>
-                {% endfor %}
-              </div>
-          <button type="submit" class="btn btn-primary" >Search</button>
-        </form>
-      </div>
-    {% endif %}
-
-    {% if user.is_authenticated %}
-      <div id="tag_panel">
-        <form id="tag_form" action="{% url 'tagentry' %}" method="post">
-           {% csrf_token %}
-              <div class="form-group{% if tagform.user_select.errors %} has-error{% endif %}">
+{% if user.is_authenticated %}
+  <div class="d-none d-lg-block">
+    <form role="search" id="tag_form" action="{% url 'tagentry' %}" method="post">
+             {% csrf_token %}
+      <div class="input-group form-group{% if tagform.user_select.errors %} has-error{% endif %}">
                 {% render_field tagform.scope class="form-control" %}
-                <label for="{{ tagform.searchtag.id_for_label }}">{{ tagform.searchtag.label }}</label>
                 {% render_field tagform.searchtag class="form-control" %}
-                {% for error in tagform.user_select.errors %}
-                  <p class="help-block">{{ error }}</p>
-                {% endfor %}
-              </div>
-          <button type="submit" class="btn btn-primary" >Tag Search</button>
-        </form>
+        <span class="input-group-append">
+          <button class="btn btn-default" type="submit"><i class="fas fa-search"></i></button>
+        </span>
       </div>
-    {% endif %}
+    </form>
+  </div>
+{% endif %}
+
+
 
     {% if display_name %}
       <div class="row">
-        <div class = "link public-link d-none d-md-block" > <!-- show public links -->
+        <div class = "link public-link d-none d-lg-block" > <!-- show public links -->
           <h3>Latest Public Links</h3>
           <p><a href="{% url 'links' scope='public' %}" title="View all public links">(view all)</a></p>
           <dl id="latest-public">
@@ -150,15 +171,15 @@
     {% endif %}
 
     {% if not user.is_authenticated %}
-      <div class="row">  <!-- Request invite -->
-        <div class = "request-invite d-none d-md-block">
+      <div class="row d-none d-lg-block">  <!-- Request invite -->
+        <div class = "request-invite">
           <p>Want to use Bulkmarks? <br>Request an invitation today.</p>
           <a class="btn btn-primary" href="{% url 'signupquick' %}" role="button">Request Invite</a>
         </div>
       </div> <!-- row -->
 
-      <div class="row">  <!-- Signup for invite -->
-        <div class = "registration  d-none d-md-block">
+      <div class="row  d-none d-lg-block">  <!-- Signup for invite -->
+        <div class = "registration">
           <p>Have an invitation? <br>Register now!</p>
           <a class="btn btn-primary" href="{% url 'registration' %}" role="button">Register</a>
         </div>
@@ -166,7 +187,7 @@
     {% endif %}
 
     {% if user.is_authenticated %}
-      <div class="row user-select"> <!-- View another user's public links -->
+      <div class="row user-select  d-none d-lg-block"> <!-- View another user's public links -->
         <div class="col-md-11">
           <form action="{% url 'linksentry' %}" method="post" > {% csrf_token %}
             <div class="form-group{% if userform.user_select.errors %} has-error{% endif %}">
