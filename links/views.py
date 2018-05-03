@@ -77,12 +77,15 @@ class LinkListView(ProfileContext, FormMixin, ListView):
 			qs = qs.filter(public=True, profile__acct_public = True)
 		else:
 			self.profile = get_object_or_None(Profile,user__username=self.scope)
-			if self.request.user.is_superuser:
-				qs = qs.filter(profile=self.profile)
-			elif self.profile.acct_public is False:
-				raise Http404
+			if self.profile:
+				if self.request.user.is_superuser:
+					qs = qs.filter(profile=self.profile)
+				elif self.profile.acct_public is False:
+					raise Http404
+				else:
+					qs = qs.filter(profile=self.profile, public = True)
 			else:
-				qs = qs.filter(profile=self.profile, public = True)
+				raise Http404
 		return qs
 
 	def get_queryset(self):
