@@ -29,3 +29,7 @@
   border-top-left-radius: .25rem;
   border-bottom-left-radius: .25rem;
 }
+
+dd > p {
+  margin-bottom: 0;
+}

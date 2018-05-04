@@ -93,22 +93,26 @@
         {% for o in object_list %}
           <div class="infinite-item link">
             <dt><a href="{% url 'linkvisit' o.id %}" target="_blank">{{ o.title }}</a></dt>
+            <dd>
             {% if o.comment %}
-              <dd>{{ o.comment|slice:":180"}}</dd>
+              <p>{{ o.comment|slice:":180"}}</p>
             {% endif %}
             {% for t in  o.tags.names %}
-              {% if forloop.first %}<dd>Tags: {% endif %}
+              {% if forloop.first %}<p>Tags: {% endif %}
                 <a href="{% url 'taglinks' scope t %}" title="Tag search for {{ t }}">
               {{ t }}</a>
               {% if not forloop.last%}, {% endif %}
-              {% if forloop.last%}</dd>{% endif %}
+              {% if forloop.last%}</p>{% endif %}
             {% endfor %} <!-- tags.names -->
+            <p>
             {% if user == o.profile.user or user.is_superuser %}
               (<a href="{% url 'linkdetail' o.id %}">Detail</a>) (<a href="{% url 'linkdelete' o.id %}">Delete</a>)
             {% endif %}
             {% if user != o.profile.user and user.is_authenticated %}
               (<a href="{% url 'linkcopy' o.id %}" title="Copy to my link list">Copy</a>)
             {% endif %}
+          </p>
+        </dd>
             {% if forloop.counter == 10 %}  <!-- 1/2 of page size -->
               {% if page_obj.has_next %}
                 <a class="infinite-more-link" style="display: none;" href="?page={{ page_obj.next_page_number }}">More</a>
@@ -159,7 +163,7 @@
     {% if display_name %}
       <div class="row">
         <div class = "link public-link d-none d-lg-block" > <!-- show public links -->
-          <h3>Latest Public Links</h3>
+          <h2>Latest Public Links</h2>
           <p><a href="{% url 'links' scope='public' %}" title="View all public links">(view all)</a></p>
           <dl id="latest-public">
             {% for p in latest_public|slice:":7" %}
