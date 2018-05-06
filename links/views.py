@@ -21,6 +21,7 @@ from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
 
 from braces.views import SuccessURLRedirectListMixin
 from annoying.functions import get_object_or_None
+from six import string_types
 
 from rest_framework import (viewsets, status)
 from rest_framework.permissions import IsAuthenticated
@@ -36,7 +37,8 @@ from .utils import test_link
 from profiles.utils import get_profile
 from .link_utils import get_title
 from .choices import LINK_STATUS_CHOICES
-from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, delete_user_links )
+from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, delete_user_links,
+                    import_links_from_feedly, )
 from .messages import messages
 from .serializers import LinkSerializer, AddURLLinkSerializer, TestLinkSerializer
 from profiles.views import ProfileContext
@@ -285,8 +287,15 @@ class UploadImportFileTemplateView(LoginRequiredMixin, ProfileContext, FormView)
 		f = self.request.FILES['import_file']
 		instance.file_name = f.name
 		if not f.multiple_chunks():  # enforce size limit
-			instance.text = f.read()
+			import_text = f.read()
 		else:
+			import_text = 'Size limit exceeded'
+			instance.status = 'E'
+
+		if isinstance(import_text,string_types):
+			instance.text = import_text
+		else:
+			instance.text = 'Text conversion error'
 			instance.status = 'E'
 
 		instance.save()
@@ -297,6 +306,11 @@ class UploadImportFileTemplateView(LoginRequiredMixin, ProfileContext, FormView)
 				import_links_from_netscape.delay(instance.id)
 			else:
 				import_links_from_netscape(instance.id)
+		elif instance.file_format == 'F':                              # Feedly OPML format
+			if settings.USE_CELERY:
+				import_links_from_feedly.delay(instance.id)
+			else:
+				import_links_from_feedly(instance.id)
 		else:
 			# Form should catch this error.  How to report?
 			instance.status = 'E' # Unknown file format

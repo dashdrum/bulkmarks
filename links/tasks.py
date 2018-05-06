@@ -2,11 +2,13 @@ from html.parser import HTMLParser
 from html.entities import name2codepoint
 from datetime import datetime, timezone
 import time
-from django.utils.timezone import make_aware, utc
+from django.utils.timezone import make_aware, utc, now
 from annoying.functions import get_object_or_None
 from bs4 import BeautifulSoup
 from django.db import IntegrityError, DataError
 from django.core.mail import send_mail
+
+import opml
 
 from bulk.celery import app
 
@@ -37,11 +39,18 @@ def import_links_from_netscape(import_file_id):
 	except:
 		print('get import file error')
 		file_error = True
-		raise
+		import_obj = None
 
-	if import_obj:
+	if not file_error:
 
-		soup = BeautifulSoup(import_obj.text, "html5lib")
+		try:
+			soup = BeautifulSoup(import_obj.text, "html5lib")
+		except:
+			print('Parse error')
+			file_error + True
+			soup = None
+
+	if not file_error:
 
 		for link in soup.find_all('a'):
 			bookmark = {}
@@ -119,7 +128,8 @@ def import_links_from_netscape(import_file_id):
 	if import_obj:
 		import_obj.status = import_status
 		import_obj.save()
-		send_import_email(import_obj,file_error, success_count, dupe_count, error_count)
+
+	send_import_email(import_obj,file_error, success_count, dupe_count, error_count)
 
 	return import_status
 
@@ -141,6 +151,118 @@ def send_import_email(import_obj,file_error, success_count, dupe_count, error_co
 	if recipients:
 		print('Sending email',subject, message, sender, recipients)
 		send_mail(subject, message, sender, recipients)
+
+@app.task()
+def import_links_from_feedly(import_file_id):
+
+	import_obj = None
+
+	import_status = None
+	error_count = 0
+	dupe_count = 0
+	success_count = 0
+	file_error = False
+
+	try:
+		import_obj = get_object_or_None(InterfaceFile, id = import_file_id)
+		print('Import file:', import_obj)
+		profile = import_obj.profile
+	except:
+		print('get import file error')
+		file_error = True
+		import_obj = None
+		profile = None
+
+	if not file_error:
+
+		try:
+			outline = opml.from_string(import_obj.text.encode())
+		except:
+			print('Parse error')
+			file_error = True
+			outline = None
+
+	if not file_error:
+
+		for i in range(0,len(outline)):
+			for j in range(0,len(outline[i])):
+
+				link_error = False
+
+				link = outline[i][j]
+
+				bookmark = {}
+
+				# url and title
+				try:
+					bookmark['url'] = link.xmlUrl
+				except AttributeError:
+					print('No URL found')
+					link_error = True
+
+				bookmark['title'] = link.title if hasattr(link,'title') else None
+
+				# add date
+				bookmark['add_date'] = now()
+
+				# last modified
+				bookmark['last_modified'] = now()
+
+				# public
+
+				bookmark['public'] = profile.public_default and profile.acct_public
+
+				# tags
+				outline_title = outline[i].title if hasattr(outline[i],'title') else None
+				bookmark['tags'] = ['feedly', 'rss', outline[i].title]
+
+				# comment
+				bookmark['comment'] = link.htmlUrl if hasattr(link,'htmlUrl') else None
+
+
+
+				if not link_error:
+
+					current_link = Link()
+					current_link.profile = profile
+					current_link.url = bookmark['url']
+					current_link.title = bookmark['title']
+					current_link.created_on = bookmark['add_date']
+					current_link.public = bookmark['public']
+					current_link.comment = bookmark['comment']
+
+					try:
+						current_link.save()
+						for t in  bookmark['tags']:
+							current_link.tags.add(t)
+						success_count += 1
+					except IntegrityError: # duplicate entries
+						print( 'Integrity Error on: ', bookmark)
+						dupe_count += 1
+					except DataError: # crazy data
+						print( 'Data Error on: ', bookmark)
+						error_count += 1
+				else:
+					print('Link Data Error')
+					error_count += 1
+
+	print('File Error:', file_error)
+	print('Success Count:', success_count)
+	print('Dupe Count:', dupe_count)
+	print('Error Count:', error_count)
+
+	if file_error is False:
+		import_status = 'Y'
+	else:
+		import_status = 'E'
+
+	if import_obj:
+		import_obj.status = import_status
+		import_obj.save()
+
+	send_import_email(import_obj,file_error, success_count, dupe_count, error_count)
+
+	return import_status
 
 #-----------------------------------------------------------------------------#
 
