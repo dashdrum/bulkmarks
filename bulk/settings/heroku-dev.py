@@ -17,7 +17,7 @@ DATABASES = {
 
 ## Heroku Whitenoise setting
 
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 STATIC_ROOT = path.join(BASE_DIR, 'staticfiles')
 

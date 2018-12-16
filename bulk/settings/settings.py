@@ -145,10 +145,6 @@ else:
 
 MIDDLEWARE.insert(1,'whitenoise.middleware.WhiteNoiseMiddleware')
 
-## Whitenoise STATIC_ROOT override:
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 # Add app before django.contrib.staticfiles to enable Whitenoise in development
 
 for i, app in enumerate(INSTALLED_APPS):
