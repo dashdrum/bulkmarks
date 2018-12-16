@@ -66,8 +66,11 @@ def import_links_from_netscape(import_file_id):
 
 			# add date
 			secs = link.get('add_date')
-			date = datetime.fromtimestamp(int(secs), tz=timezone.utc)
-			bookmark['add_date'] = date
+			if secs:
+				date = datetime.fromtimestamp(int(secs), tz=timezone.utc)
+				bookmark['add_date'] = date
+			else:
+				bookmark['add_date'] = now()
 
 			# last modified
 			secs = link.get('last_modified')
@@ -93,7 +96,10 @@ def import_links_from_netscape(import_file_id):
 
 			# comment
 			sibling = link.parent.next_sibling
-			bookmark['comment'] = sibling.string.strip()[:1000] if sibling and sibling.name == 'dd' else ''
+			if sibling and hasattr(sibling, 'string') and sibling.string and sibling.name == 'dd':
+				bookmark['comment'] = sibling.string.strip()[:1000]
+			else:
+				bookmark['comment'] = ''
 
 			current_link = Link()
 			current_link.profile = profile

@@ -292,6 +292,9 @@ class UploadImportFileTemplateView(LoginRequiredMixin, ProfileContext, FormView)
 			import_text = 'Size limit exceeded'
 			instance.status = 'E'
 
+		if isinstance(import_text,bytes):
+			import_text = import_text.decode("utf-8")
+
 		if isinstance(import_text,string_types):
 			instance.text = import_text
 		else:
