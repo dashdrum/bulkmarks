@@ -19,6 +19,7 @@ def get_title(url):
 			soup = BeautifulSoup(page,'html.parser')
 			try:
 				title = soup.title.string.encode('utf-8').decode() ## clumsy!!
+				title = (title[:197] + '...') if len(title) > 197 else title
 				return title, '200'
 			except:
 				error_code = '404'
