@@ -31,6 +31,7 @@ urlpatterns = [
 	url(r'^export/$', ExportLinksView.as_view(), name='export'),
 	url(r'^search/$', SearchLinkListView.as_view(), name='searchentry'),
 	url(r'^search/(?P<scope>.*)/(?P<searchparam>.*)/$', SearchLinkListView.as_view(), name='search'),
+	url(r'^search/(?P<scope>.*)/$', SearchLinkListView.as_view(), name='searchnoparam'),
 
 	## Admin links
 
