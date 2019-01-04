@@ -1,8 +1,14 @@
 {% extends "links_base.html" %}
+{% load staticfiles %}
 
 {% load widget_tweaks %}
 
 {% block title %}{{ block.super }} - Add/Edit{% endblock title %}
+
+{% block js.custom %}
+	{{ block.super }}
+	<script src="{% static 'links/js/link_add.js' %}"></script>
+{% endblock js.custom %}
 
 
 {% block page_title %}Link Add/Edit{% endblock page_title %}

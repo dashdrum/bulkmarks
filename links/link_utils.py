@@ -33,8 +33,11 @@ def get_title(url):
 	except URLError as e:
 		print("URLError:", e.reason)
 		error_code = '400'
+	except ValueError:
+		print("ValueError: URL format rejected")
+		error_code = '400'
 	except ContentTooShortError as e:
-		error_code = 500
+		error_code = '500'
 	except RemoteDisconnected as e:
 		pass
 

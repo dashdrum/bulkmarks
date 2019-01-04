@@ -524,9 +524,9 @@ class GetTitleAPIView(APIView):
 
 	def get(self, request, *args, **kwargs):
 
-		url = request.GET.get('URL',None)
-
 		error_code = None
+
+		url = request.GET.get('URL',None)
 
 		if not url: ## Something is missing
 			return Response(status=status.HTTP_400_BAD_REQUEST,
