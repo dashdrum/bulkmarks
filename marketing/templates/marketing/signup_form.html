@@ -8,6 +8,12 @@
 {% block content %}
 <form action="." method="post" > {% csrf_token %}
 <div class="row">
+	<div class="col-md-6 offset-md-1">
+		<p> Registration for BulkMarks is currently by invitation only.  To request an invitation, please enter your email address in the field below and press Signup. </p>
+		<p>Watch your email for your invitation to arrive soon.</p>
+	</div>
+</div>
+<div class="row">
 	<div id="signupInfo" class="col-md-10 offset-md-1">
 
 		<span class='show_error'>{{ form.non_field_errors }}</span>
