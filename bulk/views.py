@@ -11,7 +11,16 @@ class IndexView(RedirectView):
 
 	def get_redirect_url(self, *args, **kwargs):
 
-		return reverse('linksentry')
+		if self.mid:
+			return reverse('linksentry') + '?mid=' + self.mid
+		else:
+			return reverse('linksentry')
+
+	def get(self, request, *args, **kwargs):
+
+		self.mid = self.request.GET.get('mid',None)
+
+		return super(IndexView, self).get(request, *args, **kwargs)
 
 #-----------------------------------------------------------------------------#
 

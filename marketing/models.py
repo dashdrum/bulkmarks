@@ -13,7 +13,7 @@ class Signup(ModelBase):
 	email = models.EmailField(unique=True,null=False,blank=False)
 	reg_allowed = models.BooleanField(default=False)
 	invite_sent = models.DateField(null=True,blank=True)
-	status = models.CharField(max_length=1,default='N') # N = new
+	status = models.CharField(max_length=1,default='N') # N = new, R - Rejected, O - Not New
 
 	@property
 	def email_domain(self):

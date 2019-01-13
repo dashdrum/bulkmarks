@@ -12,6 +12,8 @@ class SignupQuickForm(ModelForm):
 
 		email = self.cleaned_data['email']
 
+		email = email.lower()  ## Force lowercase email address
+
 		if email:
 			try:
 				user = User.objects.get(email=email)

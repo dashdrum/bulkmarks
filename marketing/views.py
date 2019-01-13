@@ -18,7 +18,7 @@ class SignupQuickCreateView(CreateView):
 	form_class = SignupQuickForm
 
 	def get_success_url(self):
-		return reverse('index')
+		return reverse('index') + '?mid=SIGNUP'
 
 	def form_valid(self,form):
 
