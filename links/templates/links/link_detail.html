@@ -20,8 +20,8 @@
 <div class="row">
 	<div id="linkInformation" class="col-md-10 offset-md-1">
 		<h1>Link Details</h1>
-		<p><label for="title">Title:</label> {{ object.title }}</p>
 		<p><label for="url">URL:</label> {{ object.url }}</p>
+		<p><label for="title">Title:</label> {{ object.title }}</p>
 		<p><label for="comment">Comments:</label> {{ object.comment }}</p>
 		<p><label for="public">Public Link:</label> {{ object.public }}</p>
 		<p><label for="tags">Tags:</label> {% for t in  object.tags.names %}

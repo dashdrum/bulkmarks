@@ -26,5 +26,28 @@ $(document).ready(function(){
           }
       });
     };
+    var comment = $("#id_comment").val();
+    if(comment == null || comment == ""){
+      $.ajax({
+          type: "GET",
+          url: "/l/api/getdescription/",
+          data:  {'URL':  $(this).val()},
+          dataType: 'json',
+          success: function(data, textStatus, xhr){
+            var data = $.parseJSON(xhr.responseText);
+            var comment = data["description"];
+            $('#id_comment').val(comment);
+          },
+          error: function(xhr, textStatus, errorThrown){
+
+            var data = $.parseJSON(xhr.responseText);
+
+            error_code = data["error_code"]
+            error_message = data["error_message"]
+            /* This alert is only here for debugging */
+            // alert(error_message);
+          }
+      });
+    };
   });
 });

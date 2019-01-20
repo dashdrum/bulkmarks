@@ -26,3 +26,4 @@ django-postgres-metrics
 sendgrid>=3.6.5,<4
 sendgrid-django
 opml
+extruct

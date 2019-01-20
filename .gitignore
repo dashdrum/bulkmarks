@@ -158,3 +158,5 @@ devl.env
 deliciou*.html
 db.sqlite3
 links/link_screenshot.png
+links/extruct_test.py
+

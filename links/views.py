@@ -35,7 +35,7 @@ from .forms import (LinkForm, ImportFileForm, ExportFileForm, OtherUserInputForm
 					SearchInputForm, TagInputForm,  )
 from .utils import test_link
 from profiles.utils import get_profile
-from .link_utils import get_title
+from .link_utils import get_title, get_description
 from .choices import LINK_STATUS_CHOICES
 from .tasks import (import_links_from_netscape, export_links_to_netscape, test_all_links, delete_user_links,
                     import_links_from_feedly, )
@@ -539,6 +539,31 @@ class GetTitleAPIView(APIView):
 							data={'error_code': error_code, 'error_message': 'No title returned'})
 
 		return Response(status=status.HTTP_200_OK, data={"title": title})
+
+
+class GetDescriptionAPIView(APIView):
+
+	''' Return the description from a URL '''
+
+	queryset = Link.objects.all() ## Needs a queryset for permissions to work
+
+	def get(self, request, *args, **kwargs):
+
+		error_code = None
+
+		url = request.GET.get('URL',None)
+
+		if not url: ## Something is missing
+			return Response(status=status.HTTP_400_BAD_REQUEST,
+							data={"error_code": '400', "error_message": 'Missing URL'})
+
+		description, error_code = get_description(url)
+
+		if not description: ## no description returned
+			return Response(status=error_code,
+							data={'error_code': error_code, 'error_message': 'No description returned'})
+
+		return Response(status=status.HTTP_200_OK, data={"description": description})
 
 class AddURLAPIView(CreateAPIView):
 

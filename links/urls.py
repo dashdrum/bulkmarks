@@ -8,7 +8,7 @@ from .views import (LinkListView, LinkDetailView, LinkCreateView, LinkUpdateView
 					TestAllLinksView, DeleteUserLinksView, TagLinkListView,  )
 
 from .views import link_create
-from .views import (GetTitleAPIView, AddURLAPIView, TestLinkAPIView,)
+from .views import (GetTitleAPIView, GetDescriptionAPIView, AddURLAPIView, TestLinkAPIView,)
 from .views import AddURLViewSet
 
 router = routers.DefaultRouter()
@@ -46,6 +46,7 @@ urlpatterns = [
 	url(r'^', include(router.urls)),
 
 	url(r'^api/gettitle/$',GetTitleAPIView.as_view(),name='gettitle'),
+	url(r'^api/getdescription/$',GetDescriptionAPIView.as_view(),name='getdescription'),
 	url(r'^api/addurl/$',AddURLAPIView.as_view(),name='addurl'),
 	url(r'^api/testlink/$',TestLinkAPIView.as_view(),name='testlink'),
 ]

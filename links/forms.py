@@ -64,7 +64,8 @@ class LinkForm(ModelForm):
 
 	class Meta:
 		model = Link
-		fields = ['title','url','comment','public','tags','profile']
+		fields = ['url','title','comment','public','tags','profile']
+		field_order = ['url','title','comment','public','tags','profile']
 
 class ImportFileForm(Form):
 
