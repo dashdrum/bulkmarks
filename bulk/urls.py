@@ -45,11 +45,11 @@ urlpatterns = [
 	url(r'^$',IndexView.as_view(),name='index'),
 ]
 
-###  Django Debug Toolbar
+# ###  Django Debug Toolbar
 
-if 'debug_toolbar' in settings.INSTALLED_APPS:
-	from debug_toolbar import urls as debug_urls
-	urlpatterns.append(url(r'^__debug__/',include(debug_urls)))
+# if 'debug_toolbar' in settings.INSTALLED_APPS:
+# 	from debug_toolbar import urls as debug_urls
+# 	urlpatterns.append(url(r'^__debug__/',include(debug_urls)))
 
 ### Heartbeat
 
@@ -62,7 +62,7 @@ if 'heartbeat' in settings.INSTALLED_APPS:
 
 
 handler404 = Error404View.as_view()
-handler500 = Error500View.as_view()
+# handler500 = Error500View.as_view()
 
 ### django-postgres-metrics
 
