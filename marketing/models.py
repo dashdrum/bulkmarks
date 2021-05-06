@@ -22,8 +22,5 @@ class Signup(ModelBase):
 	def __str__(self):
 		return self.email
 
-	class Meta:
-		permissions = (('view_signup', "Can view signups"),)
-
 	class Admin:
 		pass

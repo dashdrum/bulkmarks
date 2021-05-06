@@ -6,7 +6,7 @@ django-annoying
 django-braces
 # django-debug-toolbar
 django-widget-tweaks
-django<2.1
+django<2.2
 djangorestframework
 git+http://github.com/dashdrum/dashdrum-django-snips.git#egg=dashdrum-django-snips
 -e git+http://github.com/dashdrum/django-heartbeat.git#egg=django-heartbeat

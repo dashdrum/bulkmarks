@@ -97,7 +97,6 @@ class Link(ModelBase):
 		super(Link, self).save(*args, **kwargs)
 
 	class Meta:
-		permissions = (('view_links', "Can view links"),)
 		unique_together = ('url','profile')
 		indexes = [
             models.Index(fields=['profile', '-created_on']),
@@ -125,9 +124,6 @@ class InterfaceFile(ModelBase):
 
 	def __str__(self):
 		return self.profile.display_name + ' ' + self.created_on.strftime('%Y-%m-%d %H:%M:%S')
-
-	class Meta:
-		permissions = (('view_interface_files',"Can view interface files"),)
 
 	class Admin:
 		pass

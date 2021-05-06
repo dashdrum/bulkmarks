@@ -37,9 +37,6 @@ class Profile(ModelBase):
 	def __str__(self):
 		return self.display_name
 
-	class Meta:
-		permissions = (('view_profiles',"Can view profiles"),)
-
 	class Admin:
 		pass
 
