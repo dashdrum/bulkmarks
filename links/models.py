@@ -45,12 +45,13 @@ class LinkSearchManager(models.Manager):
 		for term in terms:
 			q_objects.append(Q(title__icontains=term))
 			q_objects.append(Q(comment__icontains=term))
+			q_objects.append(Q(tags__name__icontains=term))
 
 		# Start with a bare QuerySet
 		qs = self.get_queryset()
 
 		# Use operator's or_ to string together all of your Q objects.
-		return qs.filter(reduce(operator.or_, q_objects))
+		return qs.filter(reduce(operator.or_, q_objects)).distinct()
 
 class Link(ModelBase):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
